@@ -8,7 +8,7 @@ class App {
    */
   init () {
     //console.log("[App] initApp")
-    let gasApp = new GoogleSpreadsheetAPI (BOOK_URL, SHEET_DAY_REPORT)
+    let gasApp = new SimpleGoogleSpreadsheet (BOOK_URL, SHEET_DAY_REPORT)
     const running = gasApp.doReadSS(1, COL_A)
     gasApp = null
     return running
@@ -19,9 +19,13 @@ class App {
    */
   fix () {
     //console.log("[App] resetRunnigStatusApp")
-    let gasApp = new GoogleSpreadsheetAPI (BOOK_URL, SHEET_DAY_REPORT)
+    let gasApp = new SimpleGoogleSpreadsheet (BOOK_URL, SHEET_DAY_REPORT)
     gasApp.doWriteSS(false, 1, COL_A)
     this.running = false
     gasApp = null
+  }
+
+  test () {
+
   }
 }
