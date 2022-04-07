@@ -1,8 +1,8 @@
 /**
  * Google スプレッドシートAPI
  */
-class SimpleGoogleSpreadsheet {
-  constructor(bookUrl, sheetName) {
+export class SimpleGoogleSpreadsheet {
+  constructor (bookUrl, sheetName) {
     this.book = SpreadsheetApp.openByUrl(bookUrl)
     this.sheetName = sheetName
     this.sheet = this.book.getSheetByName(sheetName)
@@ -14,8 +14,8 @@ class SimpleGoogleSpreadsheet {
    * @param {*} col 対象列
    * @returns row
    */
-  doGetLastRow(firstRow, col) {
-    //console.log(`[SimpleGoogleSpreadsheet] doGetLastRow [param] sheetName: ${this.sheetName}, firstRow: ${firstRow}, col: ${col}`)
+  doGetLastRow (firstRow, col) {
+    // console.log(`[SimpleGoogleSpreadsheet] doGetLastRow [param] sheetName: ${this.sheetName}, firstRow: ${firstRow}, col: ${col}`)
     if (!firstRow && !col) {
       console.error(`[SimpleGoogleSpreadsheet] doGetLastRow "Not Found Cell." [param] sheetName: ${this.sheetName} firstRow:${firstRow}, col:${col}`)
       return
@@ -32,8 +32,8 @@ class SimpleGoogleSpreadsheet {
    * @param {*} firstCol 開始列
    * @returns col
    */
-  doGetLastCol(row, firstCol) {
-    //console.log(`[SimpleGoogleSpreadsheet] doGetLastCol [param] sheetName: ${this.sheetName}, row: ${row}, firstCol: ${firstCol}`)
+  doGetLastCol (row, firstCol) {
+    // console.log(`[SimpleGoogleSpreadsheet] doGetLastCol [param] sheetName: ${this.sheetName}, row: ${row}, firstCol: ${firstCol}`)
     if (!row || !firstCol) {
       console.error(`[SimpleGoogleSpreadsheet] doGetLastCol "Not Found Cell." [param] sheetName: ${this.sheetName} row:${row}, firstCol:${firstCol}`)
       return
@@ -50,8 +50,8 @@ class SimpleGoogleSpreadsheet {
    * @param {*} col 列
    * @returns
    */
-  doWriteSS(value, row, col) {
-    //console.log(`[SimpleGoogleSpreadsheet] doWriteSS [param] sheetName: ${this.sheetName}, value: ${value}, row: ${row}, col: ${col}`)
+  doWriteSS (value, row, col) {
+    // console.log(`[SimpleGoogleSpreadsheet] doWriteSS [param] sheetName: ${this.sheetName}, value: ${value}, row: ${row}, col: ${col}`)
     if (!row || !col) {
       console.error(`[SimpleGoogleSpreadsheet] doWriteSS "Not Found Cell." [param] sheetName: ${this.sheetName} row:${row}, col:${col}, value:${value}`)
       return
@@ -62,7 +62,7 @@ class SimpleGoogleSpreadsheet {
     }
 
     const sheet = this.sheet
-    //console.log(`[SimpleGoogleSpreadsheet] doWriteSS [param] row: ${row}, col: ${col}, value: ${value}`)
+    // console.log(`[SimpleGoogleSpreadsheet] doWriteSS [param] row: ${row}, col: ${col}, value: ${value}`)
     sheet.getRange(row, col).setValue(value)
   }
 
@@ -72,8 +72,8 @@ class SimpleGoogleSpreadsheet {
    * @param {*} cellString セル指定の文字列
    * @returns
    */
-  doReadSSVerString(cellString) {
-    //console.log(`[SimpleGoogleSpreadsheet] doReadSSVerString [param] sheetName: ${this.sheetName}, cellString: ${cellString}`)
+  doReadSSVerString (cellString) {
+    // console.log(`[SimpleGoogleSpreadsheet] doReadSSVerString [param] sheetName: ${this.sheetName}, cellString: ${cellString}`)
     let reslut = null
 
     if (!cellString) {
@@ -92,18 +92,23 @@ class SimpleGoogleSpreadsheet {
    * @param {*} endCol 終了列（任意）
    * @returns
    */
-  doReadSS(row, col, endRow, endCol) {
-    //console.log(`[SimpleGoogleSpreadsheet] doReadSS [param] sheetName: ${this.sheetName}, row: ${row}, col: ${col}, endRow: ${endRow}, endCol: ${endCol}`)
+  doReadSS (row, col, endRow, endCol) {
+    // console.log(`[SimpleGoogleSpreadsheet] doReadSS [param] sheetName: ${this.sheetName}, row: ${row}, col: ${col}, endRow: ${endRow}, endCol: ${endCol}`)
     let reslut = null
-    let addition = this.getAdditionRange(row, col, endRow, endCol)
+    const addition = this.getAdditionRange(row, col, endRow, endCol)
+    const sheet = this.sheet
 
     if (!row || !col) {
       console.error(`[SimpleGoogleSpreadsheet] doReadSS"Not Found Cell." [param] sheetName: ${this.sheetName} row:${row}, col:${col}, endRow:${endRow}, endCol:${endCol}`)
       return reslut
     }
 
-    const sheet = this.sheet
-    //console.log(`[SimpleGoogleSpreadsheet]row${row}, col${col}, addition.rows${addition.rows}, addition.colums${addition.colums}`)
+    if (!endRow && !endCol) {
+      reslut = sheet.getRange(row, col, addition.rows, addition.colums).getValues()
+      return reslut[0][0]
+    }
+
+    // console.log(`[SimpleGoogleSpreadsheet]row${row}, col${col}, addition.rows${addition.rows}, addition.colums${addition.colums}`)
     reslut = sheet.getRange(row, col, addition.rows, addition.colums).getValues()
     return reslut
   }
@@ -116,8 +121,8 @@ class SimpleGoogleSpreadsheet {
    * @param {*} endCol 終了列（任意）
    */
   getAdditionRange (row, col, endRow, endCol) {
-    //console.log(`[SimpleGoogleSpreadsheet] getAdditionRange [param] sheetName: ${this.sheetName}, row: ${row}, col: ${col}, endRow: ${endRow}, endCol: ${endCol}`)
-    let result = {
+    // console.log(`[SimpleGoogleSpreadsheet] getAdditionRange [param] sheetName: ${this.sheetName}, row: ${row}, col: ${col}, endRow: ${endRow}, endCol: ${endCol}`)
+    const result = {
       rows: 1,
       colums: 1
     }
@@ -138,7 +143,7 @@ class SimpleGoogleSpreadsheet {
    * @param {*} newSheetName 新規作成のシート名
    * @returns
    */
-  copySheet(newSheetName) {
+  copySheet (newSheetName) {
     if (!newSheetName) {
       console.error(`[SimpleGoogleSpreadsheet] copySheet "Not Found new sheet name. " [param] sheetName: ${this.sheetName}newSheetName:${newSheetName}`)
       return
@@ -147,8 +152,7 @@ class SimpleGoogleSpreadsheet {
     const sheet = this.sheet
     const newSheet = sheet.copyTo(book)
     newSheet.setName(newSheetName)
-    //console.log(`[SimpleGoogleSpreadsheet] copySheet "create New Sheet: ${newSheetName}"`)
-    return
+    // console.log(`[SimpleGoogleSpreadsheet] copySheet "create New Sheet: ${newSheetName}"`)
   }
 
   /**
@@ -158,16 +162,16 @@ class SimpleGoogleSpreadsheet {
    * @param {*} valueArray プルダウンメニュー
    * @param {*} initValue 初期値（任意）
    */
-  setPullDown(row, col, valueArray, initValue) {
-    //console.log(`[SimpleGoogleSpreadsheet] setPullDown [param] sheetName: ${this.sheetName}, row: ${row}, col: ${col}, initValue: ${initValue}, valueArray`, valueArray)
+  setPullDown (row, col, valueArray, initValue) {
+    // console.log(`[SimpleGoogleSpreadsheet] setPullDown [param] sheetName: ${this.sheetName}, row: ${row}, col: ${col}, initValue: ${initValue}, valueArray`, valueArray)
     const sheet = this.sheet
     const range = sheet.getRange(row, col)
 
     /* 入力規則を作成 */
-    const rulePhase = SpreadsheetApp.newDataValidation().requireValueInList(valueArray).build();
+    const rulePhase = SpreadsheetApp.newDataValidation().requireValueInList(valueArray).build()
 
     /* 入了規則設定 */
-    range.setDataValidation(rulePhase);
+    range.setDataValidation(rulePhase)
 
     /* 初期値を設定 */
     if (initValue) {
@@ -185,9 +189,9 @@ class SimpleGoogleSpreadsheet {
    * @param {*} endRow 終了行（任意）
    * @param {*} endCol 終了列（任意）
    */
-  delRow(row, col, endRow, endCol) {
-    //console.log(`[SimpleGoogleSpreadsheet] delRow [param] sheetName: ${this.sheetName}, row: ${row}, col: ${col}, endRow: ${endRow}, endCol: ${endCol}`)
-    let addition = this.getAdditionRange(row, col, endRow, endCol)
+  delRow (row, col, endRow, endCol) {
+    // console.log(`[SimpleGoogleSpreadsheet] delRow [param] sheetName: ${this.sheetName}, row: ${row}, col: ${col}, endRow: ${endRow}, endCol: ${endCol}`)
+    const addition = this.getAdditionRange(row, col, endRow, endCol)
     const sheet = this.sheet
     const range = sheet.getRange(row, col, addition.rows, addition.colums)
     range.deleteCells(SpreadsheetApp.Dimension.ROWS)
@@ -202,8 +206,8 @@ class SimpleGoogleSpreadsheet {
    * @param {*} endCol 終了列（任意）
    */
   changeCellBackGroundColor (color, row, col, endRow, endCol) {
-    //console.log(`[SimpleGoogleSpreadsheet] changeCellBackGroundColor [param] sheetName: ${this.sheetName}, color: ${color}, row: ${row}, col: ${col}, endRow: ${endRow}, endCol: ${endCol}`)
-    let addition = this.getAdditionRange(row, col, endRow, endCol)
+    // console.log(`[SimpleGoogleSpreadsheet] changeCellBackGroundColor [param] sheetName: ${this.sheetName}, color: ${color}, row: ${row}, col: ${col}, endRow: ${endRow}, endCol: ${endCol}`)
+    const addition = this.getAdditionRange(row, col, endRow, endCol)
     const sheet = this.sheet
     const range = sheet.getRange(row, col, addition.rows, addition.colums)
     range.setBackground(color)
@@ -216,9 +220,9 @@ class SimpleGoogleSpreadsheet {
    * @param {*} cellString セル指定の文字列
    * @returns
    */
-  changeCellBackGroundColorVerString(color, cellString) {
-    //console.log(`[SimpleGoogleSpreadsheet] changeCellBackGroundColorVerString [param] sheetName: ${this.sheetName}, color: ${color}, cellString: ${cellString}`)
-    let reslut = null
+  changeCellBackGroundColorVerString (color, cellString) {
+    // console.log(`[SimpleGoogleSpreadsheet] changeCellBackGroundColorVerString [param] sheetName: ${this.sheetName}, color: ${color}, cellString: ${cellString}`)
+    const reslut = null
 
     if (!cellString) {
       return reslut

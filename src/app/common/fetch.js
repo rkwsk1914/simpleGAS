@@ -1,6 +1,6 @@
-class Fetch {
+export class Fetch {
   constructor (url) {
-    this.url
+    this.url = url
   }
 
   doGet() {
@@ -8,7 +8,7 @@ class Fetch {
 
     if (response.getContentText()) {
       const jsonData = JSON.parse(response.getContentText())
-      //console.log('[Fetch] doGet [data] json data:', jsonData)
+      // console.log('[Fetch] doGet [data] json data:', jsonData)
       return jsonData
     }
 
