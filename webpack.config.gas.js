@@ -1,6 +1,7 @@
 const TerserPlugin = require('terser-webpack-plugin')
 const ESLintPlugin = require('eslint-webpack-plugin')
 const GasPlugin = require('gas-webpack-plugin')
+const Dotenv = require('dotenv-webpack')
 // const Es3ifyPlugin = require('es3ify-webpack-plugin')
 
 module.exports = (env, argument) => {
@@ -52,7 +53,8 @@ module.exports = (env, argument) => {
         fix: true,
         failOnError: true,
         quiet: true
-      })
+      }),
+      new Dotenv()
     ],
     optimization: {
       minimize: true,

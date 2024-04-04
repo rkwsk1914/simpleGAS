@@ -1,7 +1,7 @@
 import * as Head from './header.js'
-import { Ajax } from './module/sample/ajax.js'
+// import { Ajax } from './sample/ajax.js'
 import { SimpleGoogleSpreadsheet } from './common/simple-google-spreadsheet.js'
-import { DrawSS } from './module/sample/draw-ss.js'
+import { DrawSS } from './sample/draw-ss.js'
 
 export class App {
   constructor () {
@@ -26,12 +26,12 @@ export class App {
     this.running = false
   }
 
-
   test () {
     this.init()
-    const ajax = new Ajax()
-    ajax.testDoing()
-    const drawSs =  new DrawSS(SimpleGoogleSpreadsheet(Head.BOOK_URL, Head.SHEET_NAME))
+    // const ajax = new Ajax()
+    // ajax.testDoing()
+    const sgs = new SimpleGoogleSpreadsheet(Head.BOOK_URL, Head.SHEET_NAME)
+    const drawSs = new DrawSS(sgs)
     drawSs.doing()
     this.fix()
   }

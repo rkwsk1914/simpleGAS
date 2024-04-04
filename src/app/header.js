@@ -5,8 +5,8 @@
  * スプレッドシート情報
  */
 export const BOOK_NAME = ''
-export const BOOK_URL = ''
-export const SHEET_NAME = ''
+export const BOOK_URL = process.env.BOOK_URL
+export const SHEET_NAME = 'test'
 
 /**
  * 列番号

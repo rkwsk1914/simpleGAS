@@ -1,4 +1,4 @@
-import * as Head from './../../header.js'
+import * as Head from './../header'
 
 export class DrawSS {
   constructor (gasApp) {
@@ -37,7 +37,6 @@ export class DrawSS {
       row: 1,
       col: Head.COL_B
     })
-
 
     this.yellowColorRanges.push({
       row: 2,

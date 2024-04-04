@@ -7,8 +7,8 @@
     "build": "webpack",
     "dev": "webpack --mode=development",
     "watch": "webpack --watch --mode=development",
-    "gas": "webpack --config webpack.config.gas.js",
-    "gas-d": "webpack --config webpack.config.gas.js --mode=development",
+    "gas": "webpack --config webpack.config.gas.js && clasp push",
+    "gas-d": "webpack --config webpack.config.gas.js --mode=development && clasp push",
     "gas-w": "webpack --watch --config webpack.config.gas.js --mode=development"
   },
   "author": "",
@@ -25,6 +25,7 @@
     "babel-loader": "^8.2.3",
     "css-loader": "^6.6.0",
     "css-minimizer-webpack-plugin": "^3.4.1",
+    "dotenv-webpack": "^8.1.0",
     "es3ify-webpack-plugin": "^0.1.0",
     "eslint": "^7.32.0",
     "eslint-config-standard": "^16.0.3",
