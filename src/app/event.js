@@ -13,6 +13,9 @@ export class Event {
     this.sheetBranch(nowSheetName)
   }
 
+  test () {
+  }
+
   /**
    * シートごとの処理分岐
    */
