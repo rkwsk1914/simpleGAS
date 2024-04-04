@@ -16,4 +16,3 @@ global.originEdit = (e) => {
     const event = new Event(Application, e, nowSheet)
   }
 }
-
