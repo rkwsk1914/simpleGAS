@@ -22,17 +22,17 @@ export class Ajax {
 
     return $.ajax({
       type: 'GET', /* リクエストタイプ GETかPOSTか */
-      url: url, /* Ajaxリクエストを送信するURL */
+      url, /* Ajaxリクエストを送信するURL */
       dataType: 'text' /* csv、txtファイルなら「text」, jsonファイルなら「json」などなど */
     })
-      .done((data, textStatus, jqXHR) => {
+      .done((data, _textStatus, _jqXHR) => {
         /* 読み込みに成功した時に行う処理 */
       // const jsData = this.readIndexjs()
         const testdata = data.split(/\n/)
-        console.log(testdata)
+        console.info(testdata)
       })
-      .fail((jqXHR, textStatus, errortdrown) => {
-        console.log(jqXHR)
+      .fail((jqXHR, _textStatus, _errortdrown) => {
+        console.info(jqXHR)
         /* 読み込みに失敗した時に行う処理 */
       })
       .always(() => {

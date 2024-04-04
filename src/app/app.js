@@ -13,7 +13,7 @@ export class App {
    */
   init () {
     if (this.running === true) {
-      console.log('cancel')
+      console.info('cancel')
       return
     }
     this.running = true
