@@ -18,32 +18,58 @@ global.originEdit = (e) => {
   }
 }
 
-const reply = (contents) => {
-  const channelAccessToken = process.env.CHANNEL_ACCESS_TOKEN
-  // LINE にデータを送り返すときに使う URL
-  const replyUrl = 'https://api.line.me/v2/bot/message/reply'
-  const options = {
-    method: 'post',
-    contentType: 'application/json',
-    headers: {
-      Authorization: 'Bearer ' + channelAccessToken
-    },
-    payload: JSON.stringify(contents) // リクエストボディは payload に入れる
-  }
-  UrlFetchApp.fetch(replyUrl, options)
-}
-
 global.doPost = (e) => {
-  const data = JSON.parse(e.postData.contents) // LINE から来た json データを JavaScript のオブジェクトに変換する
-  const events = data.events
+  const data = JSON.parse(e.postData.contents)
+  const events = data.events[0]
 
   const sheet = SpreadsheetApp.getActive().getActiveSheet()
-  // e.postData.contents に LINE からの json 形式データがある
-  sheet.appendRow([new Date(), e.postData.contents])
-  sheet.appendRow([process.env.CHANNEL_ACCESS_TOKEN])
-  const contents = {
-    replyToken: events.replyToken, // event.replyToken は受信したメッセージに含まれる応答トークン
-    messages: [{ type: 'text', text: 'GASから返信' }]
+
+  // LINE にデータを送り返すときに使う URL
+  const replyUrl = 'https://api.line.me/v2/bot/message/reply'
+  const ACCESS_TOKEN = process.env.CHANNEL_ACCESS_TOKEN
+  const HEADERS = {
+    'Content-Type': 'application/json; charset=UTF-8',
+    Authorization: 'Bearer ' + ACCESS_TOKEN
   }
-  reply(contents)
+  const postData = {
+    replyToken: events.replyToken,
+    messages: [{
+      type: 'text',
+      text: 'GASから返信'
+    }]
+  }
+  const options = {
+    method: 'POST',
+    headers: HEADERS,
+    payload: JSON.stringify(postData)
+  }
+
+  sheet.appendRow([new Date(), events.replyToken, JSON.stringify(events)])
+
+  const res = UrlFetchApp.fetch(replyUrl, options)
+  sheet.appendRow([res.getContentText()])
+}
+
+global.postMessage = () => {
+  // LINE にデータを送り返すときに使う URL
+  const url = 'https://api.line.me/v2/bot/message/push'
+  const ACCESS_TOKEN = process.env.CHANNEL_ACCESS_TOKEN
+  const HEADERS = {
+    'Content-Type': 'application/json; charset=UTF-8',
+    Authorization: 'Bearer ' + ACCESS_TOKEN
+  }
+  const postData = {
+    to: 'Ua20dc44c3f92c4475da1e28de064512a',
+    messages: [{
+      type: 'text',
+      text: 'GASから返信'
+    }]
+  }
+  const options = {
+    method: 'POST',
+    headers: HEADERS,
+    payload: JSON.stringify(postData)
+  }
+
+  UrlFetchApp.fetch(url, options)
 }
