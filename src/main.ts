@@ -1,26 +1,19 @@
-import $ from 'jquery'
 import * as Head from './app/header.js'
 import { App } from './app/app.js'
 import { Event } from './app/event.js'
 
-const APPLICAION = new App()
+const Application = new App()
 
 global.testApp = () => {
-  console.log('test')
-  APPLICAION.test()
+  console.info('test')
+  Application.test()
 }
 
 global.originEdit = (e) => {
   const nowBook = SpreadsheetApp.getActiveSpreadsheet().getName()
   const nowSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetName()
   if (nowBook === Head.BOOK_NAME) {
-    const event = new Event(APPLICAION, e, nowSheet)
+    const event = new Event(Application, e, nowSheet)
   }
 }
 
-/*
-$(window).on('load', () => {
-  console.log('test')
-  APPLICAION.test()
-})
-*/

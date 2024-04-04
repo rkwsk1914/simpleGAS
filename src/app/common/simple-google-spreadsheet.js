@@ -15,7 +15,7 @@ export class SimpleGoogleSpreadsheet {
    * @returns row
    */
   doGetLastRow (firstRow, col) {
-    // console.log(`[SimpleGoogleSpreadsheet] doGetLastRow [param] sheetName: ${this.sheetName}, firstRow: ${firstRow}, col: ${col}`)
+    // console.info(`[SimpleGoogleSpreadsheet] doGetLastRow [param] sheetName: ${this.sheetName}, firstRow: ${firstRow}, col: ${col}`)
     if (!firstRow && !col) {
       console.error(`[SimpleGoogleSpreadsheet] doGetLastRow "Not Found Cell." [param] sheetName: ${this.sheetName} firstRow:${firstRow}, col:${col}`)
       return
@@ -33,7 +33,7 @@ export class SimpleGoogleSpreadsheet {
    * @returns col
    */
   doGetLastCol (row, firstCol) {
-    // console.log(`[SimpleGoogleSpreadsheet] doGetLastCol [param] sheetName: ${this.sheetName}, row: ${row}, firstCol: ${firstCol}`)
+    // console.info(`[SimpleGoogleSpreadsheet] doGetLastCol [param] sheetName: ${this.sheetName}, row: ${row}, firstCol: ${firstCol}`)
     if (!row || !firstCol) {
       console.error(`[SimpleGoogleSpreadsheet] doGetLastCol "Not Found Cell." [param] sheetName: ${this.sheetName} row:${row}, firstCol:${firstCol}`)
       return
@@ -51,7 +51,7 @@ export class SimpleGoogleSpreadsheet {
    * @returns
    */
   doWriteSS (value, row, col) {
-    // console.log(`[SimpleGoogleSpreadsheet] doWriteSS [param] sheetName: ${this.sheetName}, value: ${value}, row: ${row}, col: ${col}`)
+    // console.info(`[SimpleGoogleSpreadsheet] doWriteSS [param] sheetName: ${this.sheetName}, value: ${value}, row: ${row}, col: ${col}`)
     if (!row || !col) {
       console.error(`[SimpleGoogleSpreadsheet] doWriteSS "Not Found Cell." [param] sheetName: ${this.sheetName} row:${row}, col:${col}, value:${value}`)
       return
@@ -62,7 +62,7 @@ export class SimpleGoogleSpreadsheet {
     }
 
     const sheet = this.sheet
-    // console.log(`[SimpleGoogleSpreadsheet] doWriteSS [param] row: ${row}, col: ${col}, value: ${value}`)
+    // console.info(`[SimpleGoogleSpreadsheet] doWriteSS [param] row: ${row}, col: ${col}, value: ${value}`)
     sheet.getRange(row, col).setValue(value)
   }
 
@@ -73,7 +73,7 @@ export class SimpleGoogleSpreadsheet {
    * @returns
    */
   doReadSSVerString (cellString) {
-    // console.log(`[SimpleGoogleSpreadsheet] doReadSSVerString [param] sheetName: ${this.sheetName}, cellString: ${cellString}`)
+    // console.info(`[SimpleGoogleSpreadsheet] doReadSSVerString [param] sheetName: ${this.sheetName}, cellString: ${cellString}`)
     let reslut = null
 
     if (!cellString) {
@@ -93,7 +93,7 @@ export class SimpleGoogleSpreadsheet {
    * @returns
    */
   doReadSS (row, col, endRow, endCol) {
-    // console.log(`[SimpleGoogleSpreadsheet] doReadSS [param] sheetName: ${this.sheetName}, row: ${row}, col: ${col}, endRow: ${endRow}, endCol: ${endCol}`)
+    // console.info(`[SimpleGoogleSpreadsheet] doReadSS [param] sheetName: ${this.sheetName}, row: ${row}, col: ${col}, endRow: ${endRow}, endCol: ${endCol}`)
     let reslut = null
     const addition = this.getAdditionRange(row, col, endRow, endCol)
     const sheet = this.sheet
@@ -108,7 +108,7 @@ export class SimpleGoogleSpreadsheet {
       return reslut[0][0]
     }
 
-    // console.log(`[SimpleGoogleSpreadsheet]row${row}, col${col}, addition.rows${addition.rows}, addition.colums${addition.colums}`)
+    // console.info(`[SimpleGoogleSpreadsheet]row${row}, col${col}, addition.rows${addition.rows}, addition.colums${addition.colums}`)
     reslut = sheet.getRange(row, col, addition.rows, addition.colums).getValues()
     return reslut
   }
@@ -121,7 +121,7 @@ export class SimpleGoogleSpreadsheet {
    * @param {*} endCol 終了列（任意）
    */
   getAdditionRange (row, col, endRow, endCol) {
-    // console.log(`[SimpleGoogleSpreadsheet] getAdditionRange [param] sheetName: ${this.sheetName}, row: ${row}, col: ${col}, endRow: ${endRow}, endCol: ${endCol}`)
+    // console.info(`[SimpleGoogleSpreadsheet] getAdditionRange [param] sheetName: ${this.sheetName}, row: ${row}, col: ${col}, endRow: ${endRow}, endCol: ${endCol}`)
     const result = {
       rows: 1,
       colums: 1
@@ -152,7 +152,7 @@ export class SimpleGoogleSpreadsheet {
     const sheet = this.sheet
     const newSheet = sheet.copyTo(book)
     newSheet.setName(newSheetName)
-    // console.log(`[SimpleGoogleSpreadsheet] copySheet "create New Sheet: ${newSheetName}"`)
+    // console.info(`[SimpleGoogleSpreadsheet] copySheet "create New Sheet: ${newSheetName}"`)
   }
 
   /**
@@ -163,7 +163,7 @@ export class SimpleGoogleSpreadsheet {
    * @param {*} initValue 初期値（任意）
    */
   setPullDown (row, col, valueArray, initValue) {
-    // console.log(`[SimpleGoogleSpreadsheet] setPullDown [param] sheetName: ${this.sheetName}, row: ${row}, col: ${col}, initValue: ${initValue}, valueArray`, valueArray)
+    // console.info(`[SimpleGoogleSpreadsheet] setPullDown [param] sheetName: ${this.sheetName}, row: ${row}, col: ${col}, initValue: ${initValue}, valueArray`, valueArray)
     const sheet = this.sheet
     const range = sheet.getRange(row, col)
 
@@ -190,7 +190,7 @@ export class SimpleGoogleSpreadsheet {
    * @param {*} endCol 終了列（任意）
    */
   delRow (row, col, endRow, endCol) {
-    // console.log(`[SimpleGoogleSpreadsheet] delRow [param] sheetName: ${this.sheetName}, row: ${row}, col: ${col}, endRow: ${endRow}, endCol: ${endCol}`)
+    // console.info(`[SimpleGoogleSpreadsheet] delRow [param] sheetName: ${this.sheetName}, row: ${row}, col: ${col}, endRow: ${endRow}, endCol: ${endCol}`)
     const addition = this.getAdditionRange(row, col, endRow, endCol)
     const sheet = this.sheet
     const range = sheet.getRange(row, col, addition.rows, addition.colums)
@@ -206,7 +206,7 @@ export class SimpleGoogleSpreadsheet {
    * @param {*} endCol 終了列（任意）
    */
   changeCellBackGroundColor (color, row, col, endRow, endCol) {
-    // console.log(`[SimpleGoogleSpreadsheet] changeCellBackGroundColor [param] sheetName: ${this.sheetName}, color: ${color}, row: ${row}, col: ${col}, endRow: ${endRow}, endCol: ${endCol}`)
+    // console.info(`[SimpleGoogleSpreadsheet] changeCellBackGroundColor [param] sheetName: ${this.sheetName}, color: ${color}, row: ${row}, col: ${col}, endRow: ${endRow}, endCol: ${endCol}`)
     const addition = this.getAdditionRange(row, col, endRow, endCol)
     const sheet = this.sheet
     const range = sheet.getRange(row, col, addition.rows, addition.colums)
@@ -221,7 +221,7 @@ export class SimpleGoogleSpreadsheet {
    * @returns
    */
   changeCellBackGroundColorVerString (color, cellString) {
-    // console.log(`[SimpleGoogleSpreadsheet] changeCellBackGroundColorVerString [param] sheetName: ${this.sheetName}, color: ${color}, cellString: ${cellString}`)
+    // console.info(`[SimpleGoogleSpreadsheet] changeCellBackGroundColorVerString [param] sheetName: ${this.sheetName}, color: ${color}, cellString: ${cellString}`)
     const reslut = null
 
     if (!cellString) {

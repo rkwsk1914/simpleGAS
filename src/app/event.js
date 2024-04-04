@@ -9,7 +9,7 @@ export class Event {
     this.oldValue = this.event.oldValue
     this.nowSheetName = nowSheetName
 
-    // console.log(event)
+    // console.info(event)
     this.sheetBranch(nowSheetName)
   }
 
@@ -17,7 +17,7 @@ export class Event {
    * シートごとの処理分岐
    */
   sheetBranch (nowSheetName) {
-    console.log(nowSheetName)
+    console.info(nowSheetName)
     switch (nowSheetName) {
       case Head.SHEET_FUNCTION_LIST:
         this.eventSheet()
@@ -31,10 +31,10 @@ export class Event {
    * イベント処理
    */
   eventSheet () {
-    console.log(this.range.columnStart)
+    console.info(this.range.columnStart)
     switch (this.range.columnStart) {
       case Head.COL_A:
-        console.log('IN')
+        console.info('IN')
         this.app.checkCallFunction(this.range.rowStart)
         break
       default:

@@ -12,7 +12,7 @@ module.exports = (env, argument) => {
 
   const CONFIG = {
     mode: MODE,
-    entry: './src/main.js',
+    entry: './src/main.ts',
     output: {
       path: `${__dirname}/dist`, //  出力ファイルのディレクトリ名
       filename: 'main.js' // 出力ファイル名
