@@ -36,7 +36,10 @@
     "no-unused-expressions": "warn",
     "no-var": "warn",
     "no-new-func" : "warn",
-    "no-undef" : "warn",
+    "no-undef": ["warn", { "typeof": true }],
     "no-tabs": 0
+  },
+  "globals": {
+    "SpreadsheetApp": "readonly"
   }
 }

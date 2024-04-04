@@ -7,7 +7,8 @@
     "build": "webpack",
     "dev": "webpack --mode=development",
     "watch": "webpack --watch --mode=development",
-    "gas": "webpack --config webpack.config.gas.js && clasp push",
+    "gas": "webpack --config webpack.config.gas.js",
+    "gas-p": "webpack --config webpack.config.gas.js && clasp push",
     "gas-d": "webpack --config webpack.config.gas.js --mode=development && clasp push",
     "gas-w": "webpack --watch --config webpack.config.gas.js --mode=development"
   },
@@ -18,7 +19,9 @@
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-react": "^7.16.7",
     "@babel/preset-typescript": "^7.16.7",
+    "@types/google-apps-script": "^1.0.82",
     "@types/jquery": "^3.5.14",
+    "@types/node": "^20.12.4",
     "@typescript-eslint/eslint-plugin": "^5.12.1",
     "@typescript-eslint/parser": "^5.12.1",
     "autoprefixer": "^10.4.2",
@@ -50,7 +53,6 @@
   },
   "dependencies": {
     "@popperjs/core": "^2.11.2",
-    "@types/google-apps-script": "^1.0.45",
     "@types/react": "^17.0.39",
     "@types/react-dom": "^17.0.11",
     "@types/three": "^0.137.0",

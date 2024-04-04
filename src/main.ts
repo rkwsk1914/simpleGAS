@@ -1,4 +1,3 @@
-import $ from 'jquery'
 import * as Head from './app/header.js'
 import { App } from './app/app.js'
 import { Event } from './app/event.js'
@@ -18,9 +17,8 @@ global.originEdit = (e) => {
   }
 }
 
-/*
-$(window).on('load', () => {
-  console.log('test')
-  APPLICAION.test()
-})
-*/
+global.doPost = (e) => {
+  const sheet = SpreadsheetApp.getActive().getActiveSheet()
+  // e.postData.contents に LINE からの json 形式データがある
+  sheet.appendRow([new Date(), e.postData.contents])
+}
