@@ -10,12 +10,18 @@ export class FetchFunction {
     this.sgsLog = new SimpleGoogleSpreadsheet(BOOK_URL, 'fetch log')
   }
 
-  doGet (url?: string) {
+  doGet ({
+    url,
+    options
+  }: {
+    url?: string,
+    options?: Record<string, any>
+  }) {
     const fetchUrl = url ?? this.baseUrl
     if (!fetchUrl || fetchUrl === '') return
 
     this.sgsLog.addData([String(new Date()), fetchUrl])
-    const response = UrlFetchApp.fetch(fetchUrl)
+    const response = UrlFetchApp.fetch(fetchUrl, options)
 
     if (response.getContentText()) {
       const jsonData = JSON.parse(response.getContentText())
@@ -34,7 +40,7 @@ export class FetchFunction {
     options
   }: {
     url?: string,
-    options: Record<string, any>
+    options?: Record<string, any>
   }) {
     const fetchUrl = url ?? this.baseUrl
     if (!fetchUrl || fetchUrl === '') return
