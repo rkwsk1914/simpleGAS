@@ -5,8 +5,8 @@ const Dotenv = require('dotenv-webpack')
 // const Es3ifyPlugin = require('es3ify-webpack-plugin')
 
 module.exports = (env, argument) => {
-  console.log(env)
-  console.log(argument)
+  console.info(env)
+  console.info(argument)
   const MODE = /development|production/.test(argument.mode) ? argument.mode : 'production' // 'production' か 'development' を指定
   // const enabledSourceMap = MODE === 'production' // ソースマップの利用有無(productionのときはソースマップを利用しない)
 

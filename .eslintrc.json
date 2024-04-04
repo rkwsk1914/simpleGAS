@@ -6,8 +6,6 @@
     "jquery": true
   },
   "extends": [
-    "plugin:react/recommended",
-    "plugin:vue/recommended",
     "standard"
   ],
   "parser": "@typescript-eslint/parser",
@@ -19,18 +17,24 @@
     "sourceType": "module"
   },
   "plugins": [
-    "react",
-    "vue",
-    "@typescript-eslint"
+    "@typescript-eslint",
+    "unused-imports"
   ],
-  "settings": {
-    "react": {
-        "version": "detect"
-    }
-  },
+  "settings": {},
   "rules": {
+    "no-console": ["error", { "allow": ["error", "info"] }],
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "unused-imports/no-unused-imports": "error",
+    "semi": ["error", "never", {"beforeStatementContinuationChars": "never"}],
+    "semi-spacing": ["error", {"after": true, "before": false}],
+    "semi-style": ["error", "first"],
+    "no-extra-semi": "error",
+    "no-unexpected-multiline": "error",
+    "no-unreachable": "error",
+    "quotes": ["error", "single", { "avoidEscape": true, "allowTemplateLiterals": true }],
+    "object-curly-spacing": ["error", "always"],
+    "no-trailing-spaces": "error",
     "no-use-before-define": "off",
-    "no-unused-vars": "warn",
     "no-void": "off",
     "node/handle-callback-err": "off",
     "no-unused-expressions": "warn",
@@ -40,6 +44,8 @@
     "no-tabs": 0
   },
   "globals": {
-    "SpreadsheetApp": "readonly"
+    "SpreadsheetApp": "readonly",
+    "UrlFetchApp": "readonly",
+    "Utilities": "readonly"
   }
 }
