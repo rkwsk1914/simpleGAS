@@ -1,7 +1,15 @@
-import * as Head from './header.js'
+import * as Head from './Header'
+import { App } from './App'
 
 export class Event {
-  constructor (app, event, nowSheetName) {
+  app: App
+  event: any
+  range: any
+  value: string
+  oldValue: string
+  nowSheetName: string
+
+  constructor (app: App, event: any, nowSheetName: string) {
     this.app = app
     this.event = event
     this.range = this.event.range
@@ -22,7 +30,7 @@ export class Event {
   sheetBranch (nowSheetName) {
     console.info(nowSheetName)
     switch (nowSheetName) {
-      case Head.SHEET_FUNCTION_LIST:
+      case Head.SHEET_FUNCTION_LIST[0]:
         this.eventSheet()
         break
       default:
@@ -38,7 +46,6 @@ export class Event {
     switch (this.range.columnStart) {
       case Head.COL_A:
         console.info('IN')
-        this.app.checkCallFunction(this.range.rowStart)
         break
       default:
         break

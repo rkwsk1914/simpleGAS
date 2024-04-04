@@ -1,8 +1,14 @@
+import Spreadsheet = GoogleAppsScript.Spreadsheet
+
 /**
  * Google スプレッドシートAPI
  */
 export class SimpleGoogleSpreadsheet {
-  constructor (bookUrl, sheetName) {
+  book: Spreadsheet.Spreadsheet
+  sheetName: string
+  sheet: any
+
+  constructor (bookUrl: string, sheetName: string) {
     this.book = SpreadsheetApp.openByUrl(bookUrl)
     this.sheetName = sheetName
     this.sheet = this.book.getSheetByName(sheetName)
@@ -14,7 +20,7 @@ export class SimpleGoogleSpreadsheet {
    * @param {*} col 対象列
    * @returns row
    */
-  doGetLastRow (firstRow, col) {
+  doGetLastRow (firstRow: number, col: number) {
     // console.info(`[SimpleGoogleSpreadsheet] doGetLastRow [param] sheetName: ${this.sheetName}, firstRow: ${firstRow}, col: ${col}`)
     if (!firstRow && !col) {
       console.error(`[SimpleGoogleSpreadsheet] doGetLastRow "Not Found Cell." [param] sheetName: ${this.sheetName} firstRow:${firstRow}, col:${col}`)
@@ -32,7 +38,7 @@ export class SimpleGoogleSpreadsheet {
    * @param {*} firstCol 開始列
    * @returns col
    */
-  doGetLastCol (row, firstCol) {
+  doGetLastCol (row: number, firstCol: number) {
     // console.info(`[SimpleGoogleSpreadsheet] doGetLastCol [param] sheetName: ${this.sheetName}, row: ${row}, firstCol: ${firstCol}`)
     if (!row || !firstCol) {
       console.error(`[SimpleGoogleSpreadsheet] doGetLastCol "Not Found Cell." [param] sheetName: ${this.sheetName} row:${row}, firstCol:${firstCol}`)
@@ -50,7 +56,7 @@ export class SimpleGoogleSpreadsheet {
    * @param {*} col 列
    * @returns
    */
-  doWriteSS (value, row, col) {
+  doWriteSS (value: string, row: number, col: number) {
     // console.info(`[SimpleGoogleSpreadsheet] doWriteSS [param] sheetName: ${this.sheetName}, value: ${value}, row: ${row}, col: ${col}`)
     if (!row || !col) {
       console.error(`[SimpleGoogleSpreadsheet] doWriteSS "Not Found Cell." [param] sheetName: ${this.sheetName} row:${row}, col:${col}, value:${value}`)
@@ -72,7 +78,7 @@ export class SimpleGoogleSpreadsheet {
    * @param {*} cellString セル指定の文字列
    * @returns
    */
-  doReadSSVerString (cellString) {
+  doReadSSVerString (cellString: string) {
     // console.info(`[SimpleGoogleSpreadsheet] doReadSSVerString [param] sheetName: ${this.sheetName}, cellString: ${cellString}`)
     let reslut = null
 
@@ -92,10 +98,14 @@ export class SimpleGoogleSpreadsheet {
    * @param {*} endCol 終了列（任意）
    * @returns
    */
-  doReadSS (row, col, endRow, endCol) {
+  doReadSS ({
+    row, col, endRow, endCol
+  }: {
+    row: number, col: number, endRow?: number, endCol?: number
+  }) {
     // console.info(`[SimpleGoogleSpreadsheet] doReadSS [param] sheetName: ${this.sheetName}, row: ${row}, col: ${col}, endRow: ${endRow}, endCol: ${endCol}`)
     let reslut = null
-    const addition = this.getAdditionRange(row, col, endRow, endCol)
+    const addition = this.getAdditionRange({ row, col, endRow, endCol })
     const sheet = this.sheet
 
     if (!row || !col) {
@@ -120,7 +130,11 @@ export class SimpleGoogleSpreadsheet {
    * @param {*} endRow 終了行（任意）
    * @param {*} endCol 終了列（任意）
    */
-  getAdditionRange (row, col, endRow, endCol) {
+  getAdditionRange ({
+    row, col, endRow, endCol
+  }: {
+    row: number, col: number, endRow?: number, endCol?: number
+  }) {
     // console.info(`[SimpleGoogleSpreadsheet] getAdditionRange [param] sheetName: ${this.sheetName}, row: ${row}, col: ${col}, endRow: ${endRow}, endCol: ${endCol}`)
     const result = {
       rows: 1,
@@ -143,7 +157,7 @@ export class SimpleGoogleSpreadsheet {
    * @param {*} newSheetName 新規作成のシート名
    * @returns
    */
-  copySheet (newSheetName) {
+  copySheet (newSheetName: string) {
     if (!newSheetName) {
       console.error(`[SimpleGoogleSpreadsheet] copySheet "Not Found new sheet name. " [param] sheetName: ${this.sheetName}newSheetName:${newSheetName}`)
       return
@@ -162,7 +176,11 @@ export class SimpleGoogleSpreadsheet {
    * @param {*} valueArray プルダウンメニュー
    * @param {*} initValue 初期値（任意）
    */
-  setPullDown (row, col, valueArray, initValue) {
+  setPullDown ({
+    row, col, valueArray, initValue
+  }: {
+    row: number, col: number, valueArray: Array<string>, initValue: string
+  }) {
     // console.info(`[SimpleGoogleSpreadsheet] setPullDown [param] sheetName: ${this.sheetName}, row: ${row}, col: ${col}, initValue: ${initValue}, valueArray`, valueArray)
     const sheet = this.sheet
     const range = sheet.getRange(row, col)
@@ -189,9 +207,13 @@ export class SimpleGoogleSpreadsheet {
    * @param {*} endRow 終了行（任意）
    * @param {*} endCol 終了列（任意）
    */
-  delRow (row, col, endRow, endCol) {
+  delRow ({
+    row, col, endRow, endCol
+  }: {
+    row: number, col: number, endRow?: number, endCol?: number
+  }) {
     // console.info(`[SimpleGoogleSpreadsheet] delRow [param] sheetName: ${this.sheetName}, row: ${row}, col: ${col}, endRow: ${endRow}, endCol: ${endCol}`)
-    const addition = this.getAdditionRange(row, col, endRow, endCol)
+    const addition = this.getAdditionRange({ row, col, endRow, endCol })
     const sheet = this.sheet
     const range = sheet.getRange(row, col, addition.rows, addition.colums)
     range.deleteCells(SpreadsheetApp.Dimension.ROWS)
@@ -205,9 +227,13 @@ export class SimpleGoogleSpreadsheet {
    * @param {*} endRow 終了行（任意）
    * @param {*} endCol 終了列（任意）
    */
-  changeCellBackGroundColor (color, row, col, endRow, endCol) {
+  changeCellBackGroundColor ({
+    color, row, col, endRow, endCol
+  }: {
+    color: string, row: number, col: number, endRow?: number, endCol?: number
+  }) {
     // console.info(`[SimpleGoogleSpreadsheet] changeCellBackGroundColor [param] sheetName: ${this.sheetName}, color: ${color}, row: ${row}, col: ${col}, endRow: ${endRow}, endCol: ${endCol}`)
-    const addition = this.getAdditionRange(row, col, endRow, endCol)
+    const addition = this.getAdditionRange({ row, col, endRow, endCol })
     const sheet = this.sheet
     const range = sheet.getRange(row, col, addition.rows, addition.colums)
     range.setBackground(color)
@@ -220,7 +246,7 @@ export class SimpleGoogleSpreadsheet {
    * @param {*} cellString セル指定の文字列
    * @returns
    */
-  changeCellBackGroundColorVerString (color, cellString) {
+  changeCellBackGroundColorVerString (color: string, cellString: string) {
     // console.info(`[SimpleGoogleSpreadsheet] changeCellBackGroundColorVerString [param] sheetName: ${this.sheetName}, color: ${color}, cellString: ${cellString}`)
     const reslut = null
 
@@ -230,5 +256,14 @@ export class SimpleGoogleSpreadsheet {
     const sheet = this.sheet
     const range = sheet.getRange(cellString)
     range.setBackground(color)
+  }
+
+  /**
+   * データの追加
+   * @param {*} data Array
+   */
+  addData (data: Array<string>) {
+    const sheet = this.sheet
+    sheet.appendRow(data)
   }
 }

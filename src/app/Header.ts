@@ -7,6 +7,7 @@
 export const BOOK_NAME = ''
 export const BOOK_URL = process.env.BOOK_URL
 export const SHEET_NAME = 'test'
+export const SHEET_FUNCTION_LIST = []
 
 /**
  * 列番号

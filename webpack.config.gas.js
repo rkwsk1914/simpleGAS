@@ -12,7 +12,7 @@ module.exports = (env, argument) => {
 
   const CONFIG = {
     mode: MODE,
-    entry: './src/main.js',
+    entry: './src/main.ts',
     output: {
       path: `${__dirname}/dist`, //  出力ファイルのディレクトリ名
       filename: 'main.js' // 出力ファイル名
@@ -43,7 +43,7 @@ module.exports = (env, argument) => {
     // フロントエンドの開発では拡張子を省略することが多いので、
     // 記載したほうがトラブルに巻き込まれにくい。
     resolve: {
-      extensions: ['*', '.ts', '.js', '.tsx', '.jsx', '.vue', '.json'] // 拡張子を配列で指定
+      extensions: ['.ts', '.js', '.json'] // 拡張子を配列で指定
     },
     plugins: [
       new GasPlugin(),

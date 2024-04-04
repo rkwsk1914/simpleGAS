@@ -44,6 +44,7 @@
     "no-tabs": 0
   },
   "globals": {
+    "GoogleAppsScript": "readonly",
     "SpreadsheetApp": "readonly",
     "UrlFetchApp": "readonly",
     "Utilities": "readonly",

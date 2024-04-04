@@ -1,9 +1,6 @@
-import * as Head from './header.js'
-// import { Ajax } from './sample/ajax.js'
-import { SimpleGoogleSpreadsheet } from './common/simple-google-spreadsheet.js'
-import { DrawSS } from './sample/draw-ss.js'
-
 export class App {
+  running: boolean
+
   constructor () {
     this.running = false
   }
@@ -30,9 +27,6 @@ export class App {
     this.init()
     // const ajax = new Ajax()
     // ajax.testDoing()
-    const sgs = new SimpleGoogleSpreadsheet(Head.BOOK_URL, Head.SHEET_NAME)
-    const drawSs = new DrawSS(sgs)
-    drawSs.doing()
     this.fix()
   }
 }
