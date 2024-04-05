@@ -121,6 +121,7 @@ export class LineApp extends GASController {
     const event = data.events[0]
 
     if (event.message.type !== 'text') return
+    if (!event.source.userId) return
 
     const userData = this.__getUserData(event.source.userId)
     if (!userData) {
@@ -132,6 +133,7 @@ export class LineApp extends GASController {
       case 'e':
       case 'もどる': {
         this.setGASUserState(userData, '')
+        this.reply(e, [INFO_MESSAGE.default])
         return
       }
       case 'a':
@@ -140,15 +142,20 @@ export class LineApp extends GASController {
         this.reply(e, [
           this.getGASEventList(),
           INFO_MESSAGE.telMeApplyEventId,
-          INFO_MESSAGE.doYouWannaDetail
+          INFO_MESSAGE.doYouWannaDetail,
+          INFO_MESSAGE.doYouWannaBack
         ])
         return
       }
       case '詳細': {
-        this.setGASUserState(userData, 'before apply detail')
-        this.reply(e, [
-          this.getGASEventList(), INFO_MESSAGE.telMeDetailEventId
-        ])
+        if (userData.state === 'apply') {
+          this.setGASUserState(userData, 'before apply detail')
+          this.reply(e, [
+            this.getGASEventList(), INFO_MESSAGE.telMeDetailEventId
+          ])
+          return
+        }
+        this.reply(e, [INFO_MESSAGE.default])
         return
       }
       case '俺いる？': {
@@ -173,14 +180,33 @@ export class LineApp extends GASController {
         ])
         return
       }
+      case 'リスト': {
+        this.setGASUserState(userData, 'schedule')
+        this.reply(e, [
+          this.getGASEventList(),
+          INFO_MESSAGE.telMeDetailEventId,
+          INFO_MESSAGE.doYouWannaBack
+        ])
+        return
+      }
       case 'c':
       case '参加状況': {
-        this.reply(e, [WARN_MESSAGE.notYet])
+        this.setGASUserState(userData, 'my schedule')
+        this.reply(e, [
+          this.getAppliedEventList({ userData }),
+          INFO_MESSAGE.telMeDetailEventId,
+          INFO_MESSAGE.doYouWannaBack
+        ])
         return
       }
       case 'b':
       case '支払い状況': {
-        this.reply(e, [WARN_MESSAGE.notYet])
+        this.setGASUserState(userData, 'my Pay')
+        this.reply(e, [
+          this.getPayedEventList({ userData }),
+          INFO_MESSAGE.telMeDetailEventId,
+          INFO_MESSAGE.doYouWannaBack
+        ])
         return
       }
       case 'f':
@@ -199,11 +225,14 @@ export class LineApp extends GASController {
           return
         }
 
-        if (userData.state === 'schedule') {
-          this.setGASUserState(userData, 'schedule')
+        if (userData.state === 'schedule' ||
+        userData.state === 'my schedule' ||
+        userData.state === 'my Pay') {
+          this.setGASUserState(userData, userData.state)
           this.reply(e, [
             this.getGASEventDetail(event.message.text),
             INFO_MESSAGE.telMeDetailEventId,
+            INFO_MESSAGE.doYouWannaSchedule,
             INFO_MESSAGE.doYouWannaBack
           ])
           return
@@ -224,6 +253,6 @@ export class LineApp extends GASController {
     const data = JSON.parse(e.postData.contents)
     const event = data.events[0]
 
-    this.reply(e, [this.setGASApplyEvent(userData, event.message.text)])
+    this.reply(e, this.setGASApplyEvent(userData, event.message.text))
   }
 }

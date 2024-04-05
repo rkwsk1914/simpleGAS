@@ -9,14 +9,12 @@ global.test = () => {
   const doDO = (message) => {
     LineApplication.post(
       process.env.MY_ACCOUNT_ID,
-      [
-        SCM.setGASApplyEvent({
-          name: 'kawawaski',
-          userId: process.env.MY_ACCOUNT_ID,
-          rowIndex: 7,
-          state: 'apply'
-        }, message)
-      ]
+      SCM.setGASApplyEvent({
+        name: 'kawawaski',
+        userId: process.env.MY_ACCOUNT_ID,
+        rowIndex: 7,
+        state: 'apply'
+      }, message)
     )
   }
   doDO('1, 2')

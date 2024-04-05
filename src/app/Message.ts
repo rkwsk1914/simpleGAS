@@ -35,6 +35,10 @@ export const WARN_MESSAGE: Record<string, MessagesType> = {
   notYet: {
     type: 'text',
     text: 'アップデートをお待ちを。'
+  },
+  alreadyPay: {
+    type: 'text',
+    text: '参加費'
   }
 }
 
@@ -76,5 +80,13 @@ export const INFO_MESSAGE: Record<string, MessagesType> = {
   doYouWannaBack: {
     type: 'text',
     text: '最初に戻りたければ「もどる」ってメッセージして'
+  },
+  doYouWannaSchedule: {
+    type: 'text',
+    text: 'もう一度スケジュールが知りたければ「スケジュール」or「リスト」ってメッセージして！'
+  },
+  backTop: {
+    type: 'text',
+    text: '最初にもどります。'
   }
 }

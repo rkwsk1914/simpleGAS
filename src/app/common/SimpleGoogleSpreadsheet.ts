@@ -290,4 +290,39 @@ export class SimpleGoogleSpreadsheet {
     const sheet = this.sheet
     sheet.appendRow(data)
   }
+
+  removeDuplicates ({
+    row, col, endRow, endCol
+  }: {
+    row: number, col: number, endRow?: number, endCol?: number
+  }) {
+    const addition = this.getAdditionRange({ row, col, endRow, endCol })
+    const sheet = this.sheet
+
+    if (!row || !col) {
+      console.error(`[SimpleGoogleSpreadsheet] doReadSS"Not Found Cell." [param] sheetName: ${this.sheetName} row:${row}, col:${col}, endRow:${endRow}, endCol:${endCol}`)
+      return
+    }
+
+    if (!endRow && !endCol) {
+      const range = sheet.getRange(row, col, addition.rows, addition.colums)
+      range.removeDuplicates()
+      return
+    }
+
+    // console.info(`[SimpleGoogleSpreadsheet]row${row}, col${col}, addition.rows${addition.rows}, addition.colums${addition.colums}`)
+    const range = sheet.getRange(row, col, addition.rows, addition.colums)
+    range.removeDuplicates()
+  }
+
+  removeDuplicatesVerString (
+    cellString: string
+  ) {
+    if (!cellString) {
+      return
+    }
+    const sheet = this.sheet
+    const range = sheet.getRange(cellString)
+    range.removeDuplicates()
+  }
 }
