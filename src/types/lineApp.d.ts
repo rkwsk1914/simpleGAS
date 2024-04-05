@@ -1,9 +1,13 @@
 export type MessagesType = {
   type: 'text',
   text: string
-} | undefined
+}
 
-export type UserData = {
+export type UserStateType = 'apply' | '' | 'before apply detail'
+
+export type UserDataType = {
   userId: string
   name: string
-} | undefined
+  state: UserStateType
+  rowIndex: number
+}

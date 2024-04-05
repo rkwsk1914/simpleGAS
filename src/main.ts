@@ -1,16 +1,16 @@
 import { LineApp } from './app/LineApp'
 // import { Event } from './app/event.js'
-import { ScanMessage } from './app/ScanMessage'
+import { GASController } from './app/GASController'
 
 const LineApplication = new LineApp()
 
 global.test = () => {
-  const SCM = new ScanMessage()
-  LineApplication.post(process.env.MY_ACCOUNT_ID, [SCM.showSchedule()])
-  LineApplication.post(process.env.MY_ACCOUNT_ID, [SCM.showList()])
-  // LineApplication.post(process.env.MY_ACCOUNT_ID, SCM.showDetail(1))
-  // LineApplication.post(process.env.MY_ACCOUNT_ID, SCM.showDetail(6))
-  // SCM.addUerList(LineApplication.getUserData(process.env.MY_ACCOUNT_ID))
+  const SCM = new GASController()
+  LineApplication.post(process.env.MY_ACCOUNT_ID, [SCM.getGASSchedule()])
+  LineApplication.post(process.env.MY_ACCOUNT_ID, [SCM.getGASEventList()])
+  LineApplication.post(process.env.MY_ACCOUNT_ID, [SCM.getGASEventDetail('1')])
+  LineApplication.post(process.env.MY_ACCOUNT_ID, [SCM.getGASEventDetail('(6)')])
+  LineApplication.post(process.env.MY_ACCOUNT_ID, [SCM.getGASEventDetail('1, 2')])
 }
 
 global.doPost = (e) => {

@@ -1,34 +1,36 @@
-import { BOOK_URL } from './Header'
 import * as HEAD from './Header'
 import { SimpleGoogleSpreadsheet } from './common/SimpleGoogleSpreadsheet'
-import type { MessagesType, UserData } from './../types/lineApp'
+import type { MessagesType, UserDataType, UserStateType } from './../types/lineApp'
 import { format } from 'date-fns'
 import { ja } from 'date-fns/locale/ja'
 import formatNumber from 'format-number'
 import { Log } from './Log'
+import { ERROR_MESSAGE, WARN_MESSAGE } from './Message'
 
-export class ScanMessage {
+export class GASController {
   console: Log
   sgsThisMonth: SimpleGoogleSpreadsheet
   sgsUserApplyEvent: SimpleGoogleSpreadsheet
   sgsUserPayedEvent: SimpleGoogleSpreadsheet
   sgsEventParticipationStatus: SimpleGoogleSpreadsheet
+  sgsUserState: SimpleGoogleSpreadsheet
 
   constructor () {
     this.console = new Log()
-    this.sgsThisMonth = new SimpleGoogleSpreadsheet(BOOK_URL, 'this Month')
-    this.sgsUserApplyEvent = new SimpleGoogleSpreadsheet(BOOK_URL, 'user apply Event')
-    this.sgsUserPayedEvent = new SimpleGoogleSpreadsheet(BOOK_URL, 'user payed Event')
-    this.sgsEventParticipationStatus = new SimpleGoogleSpreadsheet(BOOK_URL, 'Event Participation Status')
+    this.sgsThisMonth = new SimpleGoogleSpreadsheet(HEAD.BOOK_URL, 'this Month')
+    this.sgsUserApplyEvent = new SimpleGoogleSpreadsheet(HEAD.BOOK_URL, 'user apply Event')
+    this.sgsUserPayedEvent = new SimpleGoogleSpreadsheet(HEAD.BOOK_URL, 'user payed Event')
+    this.sgsEventParticipationStatus = new SimpleGoogleSpreadsheet(HEAD.BOOK_URL, 'Event Participation Status')
+    this.sgsUserState = new SimpleGoogleSpreadsheet(HEAD.BOOK_URL, 'user state')
   }
 
-  getData (rowData: Array<any>, index: number): Record<string, string | boolean> | null {
+  private __getData (rowData: Array<any>, index: number): Record<string, string | boolean> | undefined {
     let isAllBlank = true
-    for (let index = 0; index < rowData.length; index++) {
-      const element = rowData[index]
-      if (element || element !== '') isAllBlank = true
+    for (let col = 0; col < rowData.length; col++) {
+      const element = rowData[col]
+      if (element || element !== '') isAllBlank = false
     }
-    if (isAllBlank) return null
+    if (isAllBlank) return undefined
 
     const notFix = rowData[HEAD.ARRAY_COL_J] === true
 
@@ -70,13 +72,32 @@ export class ScanMessage {
     }
   }
 
-  showSchedule (): MessagesType {
+  private __extractNumbers (input): Array<number> {
+    const fixHalf = input.replace(/[Ａ-Ｚａ-ｚ０-９]/g, function (s) {
+      return String.fromCharCode(s.charCodeAt(0) - 0xFEE0)
+    })
+    // 正規表現を使用して数字を抽出
+    const numbers = fixHalf.match(/\d+/g)
+    // 数字が見つかった場合、それらをNumber型に変換して配列に格納
+    if (numbers) {
+      return numbers.map(num => Number(num))
+    } else {
+      return []
+    }
+  }
+
+  public getGASSchedule (): MessagesType {
     const data = this.sgsThisMonth.doReadSSVerString('A:Z')
+    // this.console.log(['getGASSchedule', JSON.stringify(data)])
 
     let message = ''
     data.forEach((row, index) => {
       if (index > 0 && row[0] !== '') {
-        const detail = this.getData(row, index)
+        const detail = this.__getData(row, index)
+
+        if (!detail) {
+          return WARN_MESSAGE.notFindSchedule
+        }
 
         if (detail) {
           message = message + `${detail.title}`
@@ -89,27 +110,27 @@ export class ScanMessage {
       }
     })
 
-    if (message === '') return null
-
     return {
       type: 'text',
       text: message
     }
   }
 
-  showList (): MessagesType {
+  public getGASEventList (): MessagesType {
     const data = this.sgsThisMonth.doReadSSVerString('A:Z')
+    // this.console.log(['getGASEventList', JSON.stringify(data)])
 
     let message = ''
     data.forEach((row, index) => {
       if (index > 0 && row[0] !== '') {
-        const detail = this.getData(row, index)
-        this.console.log(['message', message, JSON.stringify(detail)])
+        const detail = this.__getData(row, index)
+        if (!detail) {
+          return WARN_MESSAGE.notFindSchedule
+        }
+
         if (detail) message = message + `${detail.title}\n`
       }
     })
-
-    if (message === '') return null
 
     return {
       type: 'text',
@@ -117,12 +138,27 @@ export class ScanMessage {
     }
   }
 
-  showDetail (eventNumber: number): MessagesType {
-    const data = this.sgsThisMonth.doReadSSVerString('A:I')
+  public getGASEventDetail (input: string): MessagesType {
+    const data = this.sgsThisMonth.doReadSSVerString('A:Z')
+    // this.console.log(['getGASEventDetail', JSON.stringify(data)])
+
+    const eventIndexList = this.__extractNumbers(input)
+
+    if (eventIndexList.length > 1) {
+      return ERROR_MESSAGE.pleaseOne
+    }
+
+    if (eventIndexList.length === 0) {
+      return ERROR_MESSAGE.undefinedEventId
+    }
 
     let message = ''
-    const index = eventNumber
-    const detail = this.getData(data[index], index)
+    const index = eventIndexList[0]
+    const detail = this.__getData(data[index], index)
+
+    if (!detail) {
+      return ERROR_MESSAGE.notFindEventId
+    }
 
     if (detail) {
       message = message + `${detail.title}`
@@ -132,16 +168,14 @@ export class ScanMessage {
       if (detail.description) message = message + `\n\n${detail.description}`
     }
 
-    if (message === '') return null
-
     return {
       type: 'text',
       text: message
     }
   }
 
-  addUerList (userData: UserData) {
-    const findUserIndex = (userData: UserData, sgs: SimpleGoogleSpreadsheet) => {
+  private __setUerList (userData: UserDataType) {
+    const findUserIndex = (userData: UserDataType, sgs: SimpleGoogleSpreadsheet) => {
       const data = sgs.doReadSSVerString('A:B')
 
       for (let index = 0; index < data.length; index++) {
@@ -158,23 +192,10 @@ export class ScanMessage {
 
     findUserIndex(userData, this.sgsUserApplyEvent)
     findUserIndex(userData, this.sgsUserPayedEvent)
+    findUserIndex(userData, this.sgsUserState)
   }
 
-  __extractNumbers (input): Array<number> {
-    const fixHalf = input.replace(/[Ａ-Ｚａ-ｚ０-９]/g, function (s) {
-      return String.fromCharCode(s.charCodeAt(0) - 0xFEE0)
-    })
-    // 正規表現を使用して数字を抽出
-    const numbers = fixHalf.match(/\d+/g)
-    // 数字が見つかった場合、それらをNumber型に変換して配列に格納
-    if (numbers) {
-      return numbers.map(num => Number(num))
-    } else {
-      return []
-    }
-  }
-
-  addApply (userData: UserData, input: string): MessagesType {
+  public setGASApplyEvent (userData: UserDataType, input: string): MessagesType {
     const addEventParticipationStatus = (userId: string, index: number) => {
       const list = this.sgsThisMonth.doReadSSVerString('A:I')
       const fixList = list.filter((row, index) => index > 0 && row[0] !== '')
@@ -186,24 +207,27 @@ export class ScanMessage {
     }
 
     if (!userData) {
-      return {
-        type: 'text',
-        text: '申し込み失敗\n\nユーザーIDが見つかりませんでした。'
-      }
+      return ERROR_MESSAGE.notFindUserId
     }
 
     const eventIndexList = this.__extractNumbers(input)
     if (eventIndexList.length === 0) {
-      return {
-        type: 'text',
-        text: '申し込み失敗\n\nメッセージが不正でした。'
-      }
+      return ERROR_MESSAGE.missApplyMessage
     }
 
-    this.addUerList(userData)
+    this.__setUerList(userData)
 
     eventIndexList.forEach((eventIndex: number) => {
       addEventParticipationStatus(userData.userId, eventIndex)
     })
+
+    return {
+      type: 'text',
+      text: '申し込み完了しました。'
+    }
+  }
+
+  public setGASUserState (userData: UserDataType, state: UserStateType) {
+    this.sgsUserState.doWriteSS(state, userData.rowIndex, HEAD.ARRAY_COL_C)
   }
 }
