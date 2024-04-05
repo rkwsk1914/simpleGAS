@@ -31,13 +31,35 @@ export const WARN_MESSAGE: Record<string, MessagesType> = {
   notFindSchedule: {
     type: 'text',
     text: '予定はありません'
+  },
+  notYet: {
+    type: 'text',
+    text: 'アップデートをお待ちを。'
   }
 }
+
+export const MENU = {
+  a: '参加申込',
+  b: '支払い状況',
+  c: 'スケジュール',
+  d: 'もどる'
+}
+
+const menu = `
+以下のメッセージか、アルファベットを送ると分かるよ！
+
+a.参加申込
+b.支払い状況
+c.参加状況
+d.スケジュール
+e.もどる
+f.キャンセル
+`
 
 export const INFO_MESSAGE: Record<string, MessagesType> = {
   default: {
     type: 'text',
-    text: '参加するなら「参加申込」ってメッセージして！'
+    text: menu
   },
   telMeApplyEventId: {
     type: 'text',
@@ -50,5 +72,9 @@ export const INFO_MESSAGE: Record<string, MessagesType> = {
   telMeDetailEventId: {
     type: 'text',
     text: '詳細が知りたいイベントの番号を教えて！'
+  },
+  doYouWannaBack: {
+    type: 'text',
+    text: '最初に戻りたければ「もどる」ってメッセージして'
   }
 }

@@ -2,7 +2,7 @@ import * as HEAD from './Header'
 import { FetchFunction } from './common/fetch'
 import { SimpleGoogleSpreadsheet } from './common/SimpleGoogleSpreadsheet'
 import { GASController } from './GASController'
-import { ERROR_MESSAGE, INFO_MESSAGE } from './Message'
+import { ERROR_MESSAGE, INFO_MESSAGE, WARN_MESSAGE } from './Message'
 
 import type { MessagesType, UserDataType, UserStateType } from './../types/lineApp'
 
@@ -129,6 +129,12 @@ export class LineApp extends GASController {
     }
 
     switch (event.message.text) {
+      case 'e':
+      case 'もどる': {
+        this.setGASUserState(userData, '')
+        return
+      }
+      case 'a':
       case '参加申込': {
         this.setGASUserState(userData, 'apply')
         this.reply(e, [
@@ -157,6 +163,31 @@ export class LineApp extends GASController {
         ])
         return
       }
+      case 'd':
+      case 'スケジュール': {
+        this.setGASUserState(userData, 'schedule')
+        this.reply(e, [
+          this.getGASSchedule(),
+          INFO_MESSAGE.telMeDetailEventId,
+          INFO_MESSAGE.doYouWannaBack
+        ])
+        return
+      }
+      case 'c':
+      case '参加状況': {
+        this.reply(e, [WARN_MESSAGE.notYet])
+        return
+      }
+      case 'b':
+      case '支払い状況': {
+        this.reply(e, [WARN_MESSAGE.notYet])
+        return
+      }
+      case 'f':
+      case 'キャンセル': {
+        this.reply(e, [WARN_MESSAGE.notYet])
+        return
+      }
       default: {
         if (userData.state === 'before apply detail') {
           this.setGASUserState(userData, 'apply')
@@ -164,6 +195,16 @@ export class LineApp extends GASController {
             this.getGASEventDetail(event.message.text),
             INFO_MESSAGE.telMeApplyEventId,
             INFO_MESSAGE.doYouWannaDetail
+          ])
+          return
+        }
+
+        if (userData.state === 'schedule') {
+          this.setGASUserState(userData, 'schedule')
+          this.reply(e, [
+            this.getGASEventDetail(event.message.text),
+            INFO_MESSAGE.telMeDetailEventId,
+            INFO_MESSAGE.doYouWannaBack
           ])
           return
         }
