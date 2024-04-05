@@ -25,13 +25,6 @@ export class GASController {
   }
 
   private __getData (rowData: Array<any>, index: number): Record<string, string | boolean> | undefined {
-    let isAllBlank = true
-    for (let col = 0; col < rowData.length; col++) {
-      const element = rowData[col]
-      if (element || element !== '') isAllBlank = false
-    }
-    if (isAllBlank) return undefined
-
     const notFix = rowData[HEAD.ARRAY_COL_J] === true
 
     const startDay = format(new Date(rowData[HEAD.ARRAY_COL_B]), 'M/d(E)', { locale: ja })
@@ -88,7 +81,6 @@ export class GASController {
 
   public getGASSchedule (): MessagesType {
     const data = this.sgsThisMonth.doReadSSVerString('A:Z')
-    // this.console.log(['getGASSchedule', JSON.stringify(data)])
 
     let message = ''
     data.forEach((row, index) => {
@@ -118,7 +110,6 @@ export class GASController {
 
   public getGASEventList (): MessagesType {
     const data = this.sgsThisMonth.doReadSSVerString('A:Z')
-    // this.console.log(['getGASEventList', JSON.stringify(data)])
 
     let message = ''
     data.forEach((row, index) => {
@@ -140,7 +131,6 @@ export class GASController {
 
   public getGASEventDetail (input: string): MessagesType {
     const data = this.sgsThisMonth.doReadSSVerString('A:Z')
-    // this.console.log(['getGASEventDetail', JSON.stringify(data)])
 
     const eventIndexList = this.__extractNumbers(input)
 
@@ -154,6 +144,11 @@ export class GASController {
 
     let message = ''
     const index = eventIndexList[0]
+
+    if (!data[index] || index === 0) {
+      return ERROR_MESSAGE.undefinedEventId
+    }
+
     const detail = this.__getData(data[index], index)
 
     if (!detail) {
@@ -174,52 +169,35 @@ export class GASController {
     }
   }
 
-  private __setUerList (userData: UserDataType) {
-    const findUserIndex = (userData: UserDataType, sgs: SimpleGoogleSpreadsheet) => {
-      const data = sgs.doReadSSVerString('A:B')
-
-      for (let index = 0; index < data.length; index++) {
-        const row = data[index]
-
-        if (row[HEAD.ARRAY_COL_B] === userData.userId) return
-
-        if (row[HEAD.ARRAY_COL_B] === '') {
-          sgs.addData([userData.name, userData.userId])
-          return
-        }
-      }
-    }
-
-    findUserIndex(userData, this.sgsUserApplyEvent)
-    findUserIndex(userData, this.sgsUserPayedEvent)
-    findUserIndex(userData, this.sgsUserState)
-  }
-
   public setGASApplyEvent (userData: UserDataType, input: string): MessagesType {
-    const addEventParticipationStatus = (userId: string, index: number) => {
-      const list = this.sgsThisMonth.doReadSSVerString('A:I')
-      const fixList = list.filter((row, index) => index > 0 && row[0] !== '')
-      const data = [...Array(fixList.length)].map((_item, _i) => {
-        return _i === (index - 1) ? userId : ''
-      })
-
-      this.sgsEventParticipationStatus.addData(data)
-    }
-
-    if (!userData) {
-      return ERROR_MESSAGE.notFindUserId
-    }
-
     const eventIndexList = this.__extractNumbers(input)
     if (eventIndexList.length === 0) {
       return ERROR_MESSAGE.missApplyMessage
     }
 
-    this.__setUerList(userData)
+    let undefinedIndex = ''
+    const list = this.sgsThisMonth.doReadSSVerString('A:A')
+    eventIndexList.forEach((eventIndex) => {
+      if (eventIndex === 0 || eventIndex >= list.length) {
+        undefinedIndex = undefinedIndex + ' ' + String(eventIndex)
+      } else {
+        list.forEach((item, colIndex) => {
+          if (eventIndex === colIndex) {
+            this.sgsUserApplyEvent.doWriteSS('TRUE', userData.rowIndex, HEAD.COL_B + colIndex)
 
-    eventIndexList.forEach((eventIndex: number) => {
-      addEventParticipationStatus(userData.userId, eventIndex)
+            const lastRow = this.sgsEventParticipationStatus.doGetLastRow(1, colIndex)
+            this.sgsEventParticipationStatus.doWriteSS(userData.name, lastRow, colIndex)
+          }
+        })
+      }
     })
+
+    if (undefinedIndex !== '') {
+      return {
+        type: 'text',
+        text: `以下のイベントの申し込み失敗しました\n${undefinedIndex}`
+      }
+    }
 
     return {
       type: 'text',
@@ -228,6 +206,6 @@ export class GASController {
   }
 
   public setGASUserState (userData: UserDataType, state: UserStateType) {
-    this.sgsUserState.doWriteSS(state, userData.rowIndex, HEAD.ARRAY_COL_C)
+    this.sgsUserState.doWriteSS(state, userData.rowIndex, HEAD.COL_C)
   }
 }

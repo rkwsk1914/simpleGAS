@@ -37,9 +37,7 @@ export class LineApp extends GASController {
   }
 
   private __checkMessagesUndefined (messages: Array<MessagesType>): boolean {
-    // this.console.log(['__checkMessagesUndefined', String(messages.length)])
     for (let index = 0; index < messages.length; index++) {
-      // this.console.log(['__checkMessagesUndefined', String(index), JSON.stringify(messages[index])])
       if (messages[index] === undefined) return true
     }
     return false
@@ -63,14 +61,15 @@ export class LineApp extends GASController {
     stateListData.forEach((rowData, index) => {
       if (rowData[HEAD.ARRAY_COL_B] === res.userId) {
         state = rowData[HEAD.ARRAY_COL_C] as UserStateType
-        rowIndex = index
+        rowIndex = index + 1
       }
     })
 
     if (rowIndex === 0) {
-      this.sgsUserState.doWriteSS(res.displayName, stateListData.length, HEAD.ARRAY_COL_A)
-      this.sgsUserState.doWriteSS(res.userId, stateListData.length, HEAD.ARRAY_COL_B)
-      rowIndex = stateListData.length
+      const newIndex = stateListData.length + 1
+      this.sgsUserState.doWriteSS(res.displayName, newIndex, HEAD.COL_A)
+      this.sgsUserState.doWriteSS(res.userId, newIndex, HEAD.COL_B)
+      rowIndex = newIndex
     }
 
     return {
@@ -101,7 +100,6 @@ export class LineApp extends GASController {
   }
 
   public post (to: string, messages: Array<MessagesType>) {
-    // this.console.log(['POST', String(this.__checkMessagesUndefined(messages))])
     if (this.__checkMessagesUndefined(messages)) return
 
     const postData = {
@@ -144,6 +142,18 @@ export class LineApp extends GASController {
         this.setGASUserState(userData, 'before apply detail')
         this.reply(e, [
           this.getGASEventList(), INFO_MESSAGE.telMeDetailEventId
+        ])
+        return
+      }
+      case '俺いる？': {
+        const message = !userData
+          ? 'いない'
+          : `いる\n${userData.userId}\n${userData.rowIndex}`
+        this.reply(e, [
+          {
+            type: 'text',
+            text: message
+          }
         ])
         return
       }

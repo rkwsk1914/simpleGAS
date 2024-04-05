@@ -1,3 +1,4 @@
+import * as HEAD from './../Header'
 import Spreadsheet = GoogleAppsScript.Spreadsheet
 
 /**
@@ -14,6 +15,24 @@ export class SimpleGoogleSpreadsheet {
     this.sheet = this.book.getSheetByName(sheetName)
   }
 
+  private _isBlankRow (rowData: Array<any>): boolean {
+    let result = true
+    rowData.forEach((col) => {
+      if (col !== '') result = false
+    })
+    return result
+  }
+
+  private _blankRowDel (data: Array<Array<any>> | null | undefined): Array<Array<any>> {
+    if (!data) return null
+    return data.filter((row) => !this._isBlankRow(row))
+  }
+
+  private _blankColDel (rowData: Array<any>): Array<any> {
+    if (!rowData) return null
+    return rowData.filter((col) => col !== '')
+  }
+
   /**
    * 最終行の取得
    * @param {*} firstRow 開始行
@@ -21,14 +40,14 @@ export class SimpleGoogleSpreadsheet {
    * @returns row
    */
   doGetLastRow (firstRow: number, col: number) {
-    // console.info(`[SimpleGoogleSpreadsheet] doGetLastRow [param] sheetName: ${this.sheetName}, firstRow: ${firstRow}, col: ${col}`)
-    if (!firstRow && !col) {
-      console.error(`[SimpleGoogleSpreadsheet] doGetLastRow "Not Found Cell." [param] sheetName: ${this.sheetName} firstRow:${firstRow}, col:${col}`)
-      return
-    }
+    if (firstRow < 1 && col < 1) return undefined
+
+    const colName = HEAD.COL_LIST[col - 1]
+    const data = this.doReadSSVerString(`${colName}${firstRow}:${colName}1000`)
+    if (data.length < 2) return firstRow + 1
 
     const sheet = this.sheet
-    const row = sheet.getRange(firstRow, col).getNextDataCell(SpreadsheetApp.Direction.DOWN).getRow()
+    const row = sheet.getRange(firstRow, col).getNextDataCell(SpreadsheetApp.Direction.DOWN).getRow() + 1
     return row
   }
 
@@ -39,13 +58,15 @@ export class SimpleGoogleSpreadsheet {
    * @returns col
    */
   doGetLastCol (row: number, firstCol: number) {
-    // console.info(`[SimpleGoogleSpreadsheet] doGetLastCol [param] sheetName: ${this.sheetName}, row: ${row}, firstCol: ${firstCol}`)
-    if (!row || !firstCol) {
-      console.error(`[SimpleGoogleSpreadsheet] doGetLastCol "Not Found Cell." [param] sheetName: ${this.sheetName} row:${row}, firstCol:${firstCol}`)
-      return
-    }
+    if (row < 1 && firstCol < 1) return undefined
+
+    const firstColName = HEAD.COL_LIST[firstCol - 1]
+    const lastColName = HEAD.COL_LIST[HEAD.COL_LIST.length - 1]
+    const data = this.doReadSSVerString(`${firstColName}${row}:${lastColName}${row}`)
+    if (this._blankColDel(data[0]).length < 2) return firstCol + 1
+
     const sheet = this.sheet
-    const col = sheet.getRange(row, firstCol).getNextDataCell(SpreadsheetApp.Direction.NEXT).getColumn()
+    const col = sheet.getRange(row, firstCol).getNextDataCell(SpreadsheetApp.Direction.NEXT).getColumn() + 1
     return col
   }
 
@@ -78,16 +99,19 @@ export class SimpleGoogleSpreadsheet {
    * @param {*} cellString セル指定の文字列
    * @returns
    */
-  doReadSSVerString (cellString: string) {
+  doReadSSVerString (
+    cellString: string,
+    hasBlank: boolean = false
+  ) {
     // console.info(`[SimpleGoogleSpreadsheet] doReadSSVerString [param] sheetName: ${this.sheetName}, cellString: ${cellString}`)
-    let reslut = null
+    let result = null
 
     if (!cellString) {
-      return reslut
+      return result
     }
     const sheet = this.sheet
-    reslut = sheet.getRange(cellString).getValues()
-    return reslut
+    result = sheet.getRange(cellString).getValues()
+    return hasBlank ? result : this._blankRowDel(result)
   }
 
   /**
@@ -99,28 +123,28 @@ export class SimpleGoogleSpreadsheet {
    * @returns
    */
   doReadSS ({
-    row, col, endRow, endCol
+    row, col, endRow, endCol, hasBlank = false
   }: {
-    row: number, col: number, endRow?: number, endCol?: number
+    row: number, col: number, endRow?: number, endCol?: number, hasBlank?: boolean
   }) {
     // console.info(`[SimpleGoogleSpreadsheet] doReadSS [param] sheetName: ${this.sheetName}, row: ${row}, col: ${col}, endRow: ${endRow}, endCol: ${endCol}`)
-    let reslut = null
+    let result = null
     const addition = this.getAdditionRange({ row, col, endRow, endCol })
     const sheet = this.sheet
 
     if (!row || !col) {
       console.error(`[SimpleGoogleSpreadsheet] doReadSS"Not Found Cell." [param] sheetName: ${this.sheetName} row:${row}, col:${col}, endRow:${endRow}, endCol:${endCol}`)
-      return reslut
+      return result
     }
 
     if (!endRow && !endCol) {
-      reslut = sheet.getRange(row, col, addition.rows, addition.colums).getValues()
-      return reslut[0][0]
+      result = sheet.getRange(row, col, addition.rows, addition.colums).getValues()
+      return result[0][0]
     }
 
     // console.info(`[SimpleGoogleSpreadsheet]row${row}, col${col}, addition.rows${addition.rows}, addition.colums${addition.colums}`)
-    reslut = sheet.getRange(row, col, addition.rows, addition.colums).getValues()
-    return reslut
+    result = sheet.getRange(row, col, addition.rows, addition.colums).getValues()
+    return hasBlank ? result : this._blankRowDel(result)
   }
 
   /**

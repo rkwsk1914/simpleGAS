@@ -6,11 +6,23 @@ const LineApplication = new LineApp()
 
 global.test = () => {
   const SCM = new GASController()
-  LineApplication.post(process.env.MY_ACCOUNT_ID, [SCM.getGASSchedule()])
-  LineApplication.post(process.env.MY_ACCOUNT_ID, [SCM.getGASEventList()])
-  LineApplication.post(process.env.MY_ACCOUNT_ID, [SCM.getGASEventDetail('1')])
-  LineApplication.post(process.env.MY_ACCOUNT_ID, [SCM.getGASEventDetail('(6)')])
-  LineApplication.post(process.env.MY_ACCOUNT_ID, [SCM.getGASEventDetail('1, 2')])
+  const doDO = (message) => {
+    LineApplication.post(
+      process.env.MY_ACCOUNT_ID,
+      [
+        SCM.setGASApplyEvent({
+          name: 'kawawaski',
+          userId: process.env.MY_ACCOUNT_ID,
+          rowIndex: 7,
+          state: 'apply'
+        }, message)
+      ]
+    )
+  }
+  doDO('1, 2')
+  // doDO('0')
+  // doDO('1, 6')
+  // doDO('a')
 }
 
 global.doPost = (e) => {
