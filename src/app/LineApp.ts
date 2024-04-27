@@ -143,7 +143,7 @@ export class LineApp {
   public announceBalance (toId: string) {
     const postData = {
       to: toId,
-      messages: this.createMessage.pay(this.gasController.getThisMonthData())
+      messages: [this.createMessage.pay(this.gasController.getThisMonthData())]
     }
 
     const options = {

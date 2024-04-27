@@ -16,6 +16,7 @@ export class CreateDataMessage {
       text: `
 生活費: ${data.lifePay}
 支出: ${data.pay}
+収入: ${data.income}
 残高: ${data.balance}
 総資産: ${data.assets}
 
