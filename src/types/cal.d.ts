@@ -3,6 +3,8 @@ export type CalDataType = {
   lifePay: string
   // 支出
   pay: string
+  // 収入
+  income: string
   // 残高
   balance: string
   // 総資産

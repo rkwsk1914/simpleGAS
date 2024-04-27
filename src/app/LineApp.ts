@@ -64,7 +64,7 @@ export class LineApp {
 
   private __switchMessage (text: string): Array<MessagesType> {
     switch (text) {
-      case '支出': {
+      case '残高': {
         return [this.createMessage.pay(this.gasController.getThisMonthData())]
       }
       case 'カード': {
@@ -77,10 +77,11 @@ export class LineApp {
         return [this.createMessage.debit(this.gasController.getThisMonthData())]
       }
       default: {
-        const number = Number(text)
+        const array = text.split('\n')
+        const number = Number(array[0])
 
         if (!isNaN(number)) {
-          this.gasController.addPayData(number)
+          this.gasController.addPayData(number, array[1] ?? '')
           return [MESSAGE.successAddPay]
         }
 
@@ -128,6 +129,21 @@ export class LineApp {
     const postData = {
       to: toId,
       messages
+    }
+
+    const options = {
+      method: 'POST',
+      headers: this.HEADERS,
+      payload: JSON.stringify(postData)
+    }
+
+    this.fetchFunction.doPost({ url: this.urlData.push, options })
+  }
+
+  public announceBalance (toId: string) {
+    const postData = {
+      to: toId,
+      messages: this.createMessage.pay(this.gasController.getThisMonthData())
     }
 
     const options = {

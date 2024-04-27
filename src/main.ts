@@ -20,3 +20,7 @@ global.doPostMessages = () => {
     text: 'LINE APP GASから返信 POST'
   }])
 }
+
+global.doPostAnnounceBalances = () => {
+  LineApplication.announceBalance(MY_ACCOUNT_ID)
+}

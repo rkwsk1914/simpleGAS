@@ -19,11 +19,11 @@ export class GASController {
     this.dataSgs = new SimpleGoogleSpreadsheet(BOOK_URL, '残高計算')
   }
 
-  addPayData (price: number): void {
+  addPayData (price: number, content?: string): void {
     const today = new Date()
     const formatToday = format(new Date(), 'yyyy/M/d HH:mm:ss')
     const thisMonth = String(today.getMonth() + 1)
-    this.paySgs.addData([formatToday, '', String(price), '', thisMonth])
+    this.paySgs.addData([formatToday, content ?? '', String(price), '', thisMonth])
   }
 
   getThisMonthData (month?: number): CalDataType {
@@ -45,6 +45,8 @@ export class GASController {
       lifePay: myMoney(sheetData[1][0]),
       // 支出
       pay: myMoney(sheetData[2][0]),
+      // 収入
+      income: myMoney(sheetData[3][0]),
       // 残高
       balance: myMoney(sheetData[7][0]),
       // 総資産

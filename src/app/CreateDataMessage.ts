@@ -13,14 +13,41 @@ export class CreateDataMessage {
   detail (data: CalDataType): MessagesType {
     return {
       type: 'text',
-      text: `${data.lifePay}`
+      text: `
+生活費: ${data.lifePay}
+支出: ${data.pay}
+残高: ${data.balance}
+総資産: ${data.assets}
+
+月末引き落とし
+------------------------
+町田UFJ: ${data.debit.machida}
+横浜UFJ: ${data.debit.yokohama}
+ゆうちょ: ${data.debit.yucho}
+SBI: ${data.debit.sbi}
+------------------------
+
+クレジット
+------------------------
+楽天: ${data.detail.card.raluten}
+ライフカード: ${data.detail.card.life}
+アプラス: ${data.detail.card.aplus}
+au: ${data.detail.card.au}
+------------------------
+
+MTG代 ${data.detail.mtg}
+ローン: ${data.detail.loan}
+家賃: ${data.detail.home}
+税金: ${data.detail.tax}
+発生: ${data.detail.other}
+      `
     }
   }
 
   pay (data: CalDataType): MessagesType {
     return {
       type: 'text',
-      text: `生活費: ${data.lifePay}\n支出: ${data.pay}\n発生: ${data.detail.other}`
+      text: `残高: ${data.balance}\n\n生活費: ${data.lifePay}\n支出: ${data.pay}\n発生: ${data.detail.other}`
     }
   }
 
