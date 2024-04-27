@@ -25,7 +25,6 @@ export class FetchFunction {
 
     if (response.getContentText()) {
       const jsonData = JSON.parse(response.getContentText())
-      // console.info('[Fetch] doGet [data] json data:', jsonData)
       this.sgsLog.addData(['', JSON.stringify(jsonData)])
       return jsonData
     }

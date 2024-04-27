@@ -1,8 +1,8 @@
-// import * as HEAD from '@/app/Header'
 import { CHANNEL_ACCESS_TOKEN } from '@/const/settings'
 
 import { FetchFunction } from '@/app/common/fetch'
 import { SimpleGoogleSpreadsheet } from '@/app/common/SimpleGoogleSpreadsheet'
+import * as HEAD from '@/app/Header'
 
 // import { GASController } from '@/app/GASController'
 import type { MessagesType, UserDataType } from '@/types/lineApp'
@@ -25,7 +25,7 @@ export class LineApp {
       profile: 'https://api.line.me/v2/bot/profile/'
     }
 
-    // this.sgsGetMessage = new SimpleGoogleSpreadsheet(HEAD.BOOK_URL, 'Chat')
+    this.sgsGetMessage = new SimpleGoogleSpreadsheet(HEAD.BOOK_URL, 'Chat')
     this.fetchFunction = new FetchFunction('')
 
     this.HEADERS = {
@@ -63,14 +63,16 @@ export class LineApp {
     const data = JSON.parse(e.postData.contents)
     const event = data.events[0]
 
+    this.sgsGetMessage.addData(['', JSON.stringify(event)])
+
     if (event.message.type !== 'text') return
     if (!event.source.userId) return
 
-    const userData = this.__getUserData(event.source.userId)
+    // const userData = this.__getUserData(event.source.userId)
 
     this.reply(e, [{
       type: 'text',
-      text: `${userData.name}: ${userData.userId}`
+      text: `${event.source.userId}`
     }])
   }
 
