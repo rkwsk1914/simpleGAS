@@ -1,5 +1,6 @@
-import * as HEAD from './../Header'
 import Spreadsheet = GoogleAppsScript.Spreadsheet
+
+import * as HEAD from './../Header'
 
 /**
  * Google スプレッドシートAPI

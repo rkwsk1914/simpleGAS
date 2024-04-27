@@ -1,6 +1,5 @@
-import * as HEAD from './Header'
-import { SimpleGoogleSpreadsheet } from './common/SimpleGoogleSpreadsheet'
-
+import { SimpleGoogleSpreadsheet } from '@/app/common/SimpleGoogleSpreadsheet'
+import * as HEAD from '@/app/Header'
 export class Log {
   sgsCheck: SimpleGoogleSpreadsheet
 

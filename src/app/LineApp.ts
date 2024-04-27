@@ -1,12 +1,13 @@
-import * as HEAD from './Header'
-import { FetchFunction } from './common/fetch'
-import { SimpleGoogleSpreadsheet } from './common/SimpleGoogleSpreadsheet'
-import { GASController } from './GASController'
-import { ERROR_MESSAGE, INFO_MESSAGE, WARN_MESSAGE } from './Message'
+// import * as HEAD from '@/app/Header'
+import { CHANNEL_ACCESS_TOKEN } from '@/const/settings'
 
-import type { MessagesType, UserDataType, UserStateType } from './../types/lineApp'
+import { FetchFunction } from '@/app/common/fetch'
+import { SimpleGoogleSpreadsheet } from '@/app/common/SimpleGoogleSpreadsheet'
 
-export class LineApp extends GASController {
+// import { GASController } from '@/app/GASController'
+import type { MessagesType, UserDataType } from '@/types/lineApp'
+
+export class LineApp {
   urlData: Record<string, string>
   sgsGetMessage: SimpleGoogleSpreadsheet
 
@@ -17,8 +18,6 @@ export class LineApp extends GASController {
   }
 
   constructor () {
-    super()
-
     const DOMAIN = 'https://api.line.me/v2/bot/message'
     this.urlData = {
       reply: `${DOMAIN}/reply`,
@@ -26,13 +25,12 @@ export class LineApp extends GASController {
       profile: 'https://api.line.me/v2/bot/profile/'
     }
 
-    this.sgsGetMessage = new SimpleGoogleSpreadsheet(HEAD.BOOK_URL, 'getMessage')
+    // this.sgsGetMessage = new SimpleGoogleSpreadsheet(HEAD.BOOK_URL, 'Chat')
     this.fetchFunction = new FetchFunction('')
 
-    const ACCESS_TOKEN = process.env.CHANNEL_ACCESS_TOKEN
     this.HEADERS = {
       'Content-Type': 'application/json; charset=UTF-8',
-      Authorization: 'Bearer ' + ACCESS_TOKEN
+      Authorization: 'Bearer ' + CHANNEL_ACCESS_TOKEN
     }
   }
 
@@ -55,29 +53,25 @@ export class LineApp extends GASController {
 
     if (!res.userId) return undefined
 
-    const stateListData = this.sgsUserState.doReadSSVerString('A:C')
-    let state = '' as UserStateType
-    let rowIndex = 0
-    stateListData.forEach((rowData, index) => {
-      if (rowData[HEAD.ARRAY_COL_B] === res.userId) {
-        state = rowData[HEAD.ARRAY_COL_C] as UserStateType
-        rowIndex = index + 1
-      }
-    })
-
-    if (rowIndex === 0) {
-      const newIndex = stateListData.length + 1
-      this.sgsUserState.doWriteSS(res.displayName, newIndex, HEAD.COL_A)
-      this.sgsUserState.doWriteSS(res.userId, newIndex, HEAD.COL_B)
-      rowIndex = newIndex
-    }
-
     return {
       userId: res.userId,
-      name: res.displayName,
-      state,
-      rowIndex
+      name: res.displayName
     }
+  }
+
+  public checkMessageAndPost (e: any) {
+    const data = JSON.parse(e.postData.contents)
+    const event = data.events[0]
+
+    if (event.message.type !== 'text') return
+    if (!event.source.userId) return
+
+    const userData = this.__getUserData(event.source.userId)
+
+    this.reply(e, [{
+      type: 'text',
+      text: `${userData.name}: ${userData.userId}`
+    }])
   }
 
   public reply (e: any, messages: Array<MessagesType>) {
@@ -99,11 +93,11 @@ export class LineApp extends GASController {
     this.fetchFunction.doPost({ url: this.urlData.reply, options })
   }
 
-  public post (to: string, messages: Array<MessagesType>) {
+  public post (toId: string, messages: Array<MessagesType>) {
     if (this.__checkMessagesUndefined(messages)) return
 
     const postData = {
-      to,
+      to: toId,
       messages
     }
 
@@ -114,145 +108,5 @@ export class LineApp extends GASController {
     }
 
     this.fetchFunction.doPost({ url: this.urlData.push, options })
-  }
-
-  public checkMessageAndPost (e: any) {
-    const data = JSON.parse(e.postData.contents)
-    const event = data.events[0]
-
-    if (event.message.type !== 'text') return
-    if (!event.source.userId) return
-
-    const userData = this.__getUserData(event.source.userId)
-    if (!userData) {
-      this.reply(e, [ERROR_MESSAGE.notFindUserId])
-      return
-    }
-
-    switch (event.message.text) {
-      case 'e':
-      case 'もどる': {
-        this.setGASUserState(userData, '')
-        this.reply(e, [INFO_MESSAGE.default])
-        return
-      }
-      case 'a':
-      case '参加申込': {
-        this.setGASUserState(userData, 'apply')
-        this.reply(e, [
-          this.getGASEventList(),
-          INFO_MESSAGE.telMeApplyEventId,
-          INFO_MESSAGE.doYouWannaDetail,
-          INFO_MESSAGE.doYouWannaBack
-        ])
-        return
-      }
-      case '詳細': {
-        if (userData.state === 'apply') {
-          this.setGASUserState(userData, 'before apply detail')
-          this.reply(e, [
-            this.getGASEventList(), INFO_MESSAGE.telMeDetailEventId
-          ])
-          return
-        }
-        this.reply(e, [INFO_MESSAGE.default])
-        return
-      }
-      case '俺いる？': {
-        const message = !userData
-          ? 'いない'
-          : `いる\n${userData.userId}\n${userData.rowIndex}`
-        this.reply(e, [
-          {
-            type: 'text',
-            text: message
-          }
-        ])
-        return
-      }
-      case 'd':
-      case 'スケジュール': {
-        this.setGASUserState(userData, 'schedule')
-        this.reply(e, [
-          this.getGASSchedule(),
-          INFO_MESSAGE.telMeDetailEventId,
-          INFO_MESSAGE.doYouWannaBack
-        ])
-        return
-      }
-      case 'リスト': {
-        this.setGASUserState(userData, 'schedule')
-        this.reply(e, [
-          this.getGASEventList(),
-          INFO_MESSAGE.telMeDetailEventId,
-          INFO_MESSAGE.doYouWannaBack
-        ])
-        return
-      }
-      case 'c':
-      case '参加状況': {
-        this.setGASUserState(userData, 'my schedule')
-        this.reply(e, [
-          this.getAppliedEventList({ userData }),
-          INFO_MESSAGE.telMeDetailEventId,
-          INFO_MESSAGE.doYouWannaBack
-        ])
-        return
-      }
-      case 'b':
-      case '支払い状況': {
-        this.setGASUserState(userData, 'my Pay')
-        this.reply(e, [
-          this.getPayedEventList({ userData }),
-          INFO_MESSAGE.telMeDetailEventId,
-          INFO_MESSAGE.doYouWannaBack
-        ])
-        return
-      }
-      case 'f':
-      case 'キャンセル': {
-        this.reply(e, [WARN_MESSAGE.notYet])
-        return
-      }
-      default: {
-        if (userData.state === 'before apply detail') {
-          this.setGASUserState(userData, 'apply')
-          this.reply(e, [
-            this.getGASEventDetail(event.message.text),
-            INFO_MESSAGE.telMeApplyEventId,
-            INFO_MESSAGE.doYouWannaDetail
-          ])
-          return
-        }
-
-        if (userData.state === 'schedule' ||
-        userData.state === 'my schedule' ||
-        userData.state === 'my Pay') {
-          this.setGASUserState(userData, userData.state)
-          this.reply(e, [
-            this.getGASEventDetail(event.message.text),
-            INFO_MESSAGE.telMeDetailEventId,
-            INFO_MESSAGE.doYouWannaSchedule,
-            INFO_MESSAGE.doYouWannaBack
-          ])
-          return
-        }
-
-        if (userData.state === 'apply') {
-          this.__apply(e, userData)
-          this.setGASUserState(userData, '')
-          return
-        }
-
-        this.reply(e, [INFO_MESSAGE.default])
-      }
-    }
-  }
-
-  private __apply (e: any, userData: UserDataType) {
-    const data = JSON.parse(e.postData.contents)
-    const event = data.events[0]
-
-    this.reply(e, this.setGASApplyEvent(userData, event.message.text))
   }
 }

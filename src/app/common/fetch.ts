@@ -1,5 +1,5 @@
-import { BOOK_URL } from './../Header'
 import { SimpleGoogleSpreadsheet } from './../common/SimpleGoogleSpreadsheet'
+import { BOOK_URL } from './../Header'
 
 export class FetchFunction {
   baseUrl : string
