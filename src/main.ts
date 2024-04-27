@@ -1,8 +1,15 @@
 import { MY_ACCOUNT_ID } from '@/const/settings'
 
+import { GASController } from '@/app/GASController'
 import { LineApp } from '@/app/LineApp'
 
 const LineApplication = new LineApp()
+const gas = new GASController()
+
+global.test = () => {
+  gas.getThisMonthData()
+  gas.addPayData(3000)
+}
 
 global.doPost = (e) => {
   LineApplication.checkMessageAndPost(e)

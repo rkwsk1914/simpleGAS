@@ -1,14 +1,16 @@
+import { MESSAGE } from '@/const/Message'
 import { CHANNEL_ACCESS_TOKEN } from '@/const/settings'
 
 import { FetchFunction } from '@/app/common/fetch'
 import { Log } from '@/app/common/Log'
+import { GASController } from '@/app/GASController'
 
 import type { MessagesType, UserDataType } from '@/types/lineApp'
 
 export class LineApp {
   urlData: Record<string, string>
   log: Log
-
+  gasController: GASController
   fetchFunction: FetchFunction
   HEADERS: {
     'Content-Type': string
@@ -24,6 +26,7 @@ export class LineApp {
 
     this.log = new Log('LineApp')
     this.fetchFunction = new FetchFunction()
+    this.gasController = new GASController()
 
     this.HEADERS = {
       'Content-Type': 'application/json; charset=UTF-8',
@@ -56,6 +59,21 @@ export class LineApp {
     }
   }
 
+  private __switchMessage (text: string): Array<MessagesType> {
+    switch (text) {
+      default: {
+        const number = Number(text)
+
+        if (!isNaN(number)) {
+          this.gasController.addPayData(number)
+          return [MESSAGE.successAddPay]
+        }
+
+        return [MESSAGE.failedAddPay]
+      }
+    }
+  }
+
   public checkMessageAndPost (e: any) {
     const data = JSON.parse(e.postData.contents)
     const event = data.events[0]
@@ -65,10 +83,9 @@ export class LineApp {
     if (event.message.type !== 'text') return
     if (!event.source.userId) return
 
-    this.reply(e, [{
-      type: 'text',
-      text: `${event.source.userId}`
-    }])
+    const messages = this.__switchMessage(event.message.text)
+
+    this.reply(e, messages)
   }
 
   public reply (e: any, messages: Array<MessagesType>) {
