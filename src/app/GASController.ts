@@ -21,7 +21,7 @@ export class GASController {
 
   addPayData (price: number): void {
     const today = new Date()
-    const formatToday = format(new Date(), 'yyyy/M/d')
+    const formatToday = format(new Date(), 'yyyy/M/d HH:mm:ss')
     const thisMonth = String(today.getMonth() + 1)
     this.paySgs.addData([formatToday, '', String(price), '', thisMonth])
   }
