@@ -1,6 +1,6 @@
-import Spreadsheet = GoogleAppsScript.Spreadsheet
+import * as HEAD from '@/const/Header'
 
-import * as HEAD from './../Header'
+import Spreadsheet = GoogleAppsScript.Spreadsheet
 
 /**
  * Google スプレッドシートAPI

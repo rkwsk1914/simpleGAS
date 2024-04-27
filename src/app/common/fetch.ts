@@ -1,31 +1,27 @@
-import { SimpleGoogleSpreadsheet } from './../common/SimpleGoogleSpreadsheet'
-import { BOOK_URL } from './../Header'
+import { Log } from '@/app/common/Log'
 
 export class FetchFunction {
-  baseUrl : string
-  sgsLog: SimpleGoogleSpreadsheet
+  log: Log
 
-  constructor (url: string) {
-    this.baseUrl = url
-    this.sgsLog = new SimpleGoogleSpreadsheet(BOOK_URL, 'fetch log')
+  constructor () {
+    this.log = new Log('FetchFunction')
   }
 
   doGet ({
     url,
     options
   }: {
-    url?: string,
+    url: string,
     options?: Record<string, any>
   }) {
-    const fetchUrl = url ?? this.baseUrl
-    if (!fetchUrl || fetchUrl === '') return
+    if (!url || url === '') return
 
-    this.sgsLog.addData([String(new Date()), fetchUrl])
-    const response = UrlFetchApp.fetch(fetchUrl, options)
+    this.log.push([url])
+    const response = UrlFetchApp.fetch(url, options)
 
     if (response.getContentText()) {
       const jsonData = JSON.parse(response.getContentText())
-      this.sgsLog.addData(['', JSON.stringify(jsonData)])
+      this.log.push([JSON.stringify(jsonData)])
       return jsonData
     }
 
@@ -38,19 +34,17 @@ export class FetchFunction {
     url,
     options
   }: {
-    url?: string,
+    url: string,
     options?: Record<string, any>
   }) {
-    const fetchUrl = url ?? this.baseUrl
-    if (!fetchUrl || fetchUrl === '') return
+    if (!url || url === '') return
 
-    this.sgsLog.addData([String(new Date()), fetchUrl, JSON.stringify(options)])
-    const response = UrlFetchApp.fetch(fetchUrl, options)
+    this.log.push([url, JSON.stringify(options)])
+    const response = UrlFetchApp.fetch(url, options)
 
     if (response.getContentText()) {
       const jsonData = JSON.parse(response.getContentText())
-      // console.info('[Fetch] doGet [data] json data:', jsonData)
-      this.sgsLog.addData(['', JSON.stringify(jsonData)])
+      this.log.push(['', JSON.stringify(jsonData)])
       return jsonData
     }
 
