@@ -11,7 +11,7 @@ export class Log {
     this.sgs = new SimpleGoogleSpreadsheet(BOOK_URL, 'log')
   }
 
-  push (data: Array<string | number | boolean>) {
+  push (data: Array<any>) {
     if (data.length === 0) return
     const logData = data.map((item) => JSON.stringify(item))
     this.sgs.addData([this.appName, String(new Date()), ...logData])

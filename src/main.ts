@@ -8,7 +8,6 @@ const gas = new GASController()
 
 global.test = () => {
   gas.getThisMonthData()
-  gas.addPayData(3000)
 }
 
 global.doPost = (e) => {

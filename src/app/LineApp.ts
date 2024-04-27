@@ -3,6 +3,7 @@ import { CHANNEL_ACCESS_TOKEN } from '@/const/settings'
 
 import { FetchFunction } from '@/app/common/fetch'
 import { Log } from '@/app/common/Log'
+import { CreateDataMessage } from '@/app/CreateDataMessage'
 import { GASController } from '@/app/GASController'
 
 import type { MessagesType, UserDataType } from '@/types/lineApp'
@@ -12,6 +13,7 @@ export class LineApp {
   log: Log
   gasController: GASController
   fetchFunction: FetchFunction
+  createMessage :CreateDataMessage
   HEADERS: {
     'Content-Type': string
     Authorization: string
@@ -27,6 +29,7 @@ export class LineApp {
     this.log = new Log('LineApp')
     this.fetchFunction = new FetchFunction()
     this.gasController = new GASController()
+    this.createMessage = new CreateDataMessage()
 
     this.HEADERS = {
       'Content-Type': 'application/json; charset=UTF-8',
@@ -61,6 +64,18 @@ export class LineApp {
 
   private __switchMessage (text: string): Array<MessagesType> {
     switch (text) {
+      case '支出': {
+        return [this.createMessage.pay(this.gasController.getThisMonthData())]
+      }
+      case 'カード': {
+        return [this.createMessage.card(this.gasController.getThisMonthData())]
+      }
+      case '詳細': {
+        return [this.createMessage.detail(this.gasController.getThisMonthData())]
+      }
+      case '引き落とし': {
+        return [this.createMessage.debit(this.gasController.getThisMonthData())]
+      }
       default: {
         const number = Number(text)
 
