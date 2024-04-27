@@ -11,5 +11,8 @@
     ],
     "moduleResolution": "node",
     "experimentalDecorators": true, // デコレーターを有効に設定
+    "paths": {
+      "@/*": ["./src/*"]
+    },
   }
 }

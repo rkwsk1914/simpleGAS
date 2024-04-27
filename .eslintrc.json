@@ -41,7 +41,62 @@
     "no-var": "warn",
     "no-new-func" : "warn",
     "no-undef": ["warn", { "typeof": true }],
-    "no-tabs": 0
+    "no-tabs": 0,
+    "import/order": [
+      "error",
+      {
+        "groups": [
+          "builtin",
+          "external",
+          "internal",
+          "object",
+          "parent",
+          "sibling",
+          "index",
+          "type"
+        ],
+        "newlines-between": "always",
+        "pathGroupsExcludedImportTypes": [
+          "builtin"
+        ],
+        "alphabetize": {
+          "order": "asc",
+          "caseInsensitive": true
+        },
+        "pathGroups": [
+          {
+            "pattern": "@/components/**",
+            "group": "parent",
+            "position": "before"
+          },
+          {
+            "pattern": "@/app/**",
+            "group": "parent",
+            "position": "before"
+          },
+          {
+            "pattern": "@/hooks/**",
+            "group": "internal",
+            "position": "after"
+          },
+          {
+            "pattern": "@/const/**",
+            "group": "internal",
+            "position": "after"
+          },
+          {
+            "pattern": "@/api/**",
+            "group": "internal",
+            "position": "after"
+          },
+          {
+            "pattern": "@/types/**",
+            "group": "type",
+            "position": "after"
+          }
+        ]
+      }
+    ]
   },
   "globals": {
     "GoogleAppsScript": "readonly",

@@ -3,6 +3,7 @@ const ESLintPlugin = require('eslint-webpack-plugin')
 const GasPlugin = require('gas-webpack-plugin')
 const Dotenv = require('dotenv-webpack')
 // const Es3ifyPlugin = require('es3ify-webpack-plugin')
+const path = require('path');
 
 module.exports = (env, argument) => {
   console.info(env)
@@ -43,7 +44,10 @@ module.exports = (env, argument) => {
     // フロントエンドの開発では拡張子を省略することが多いので、
     // 記載したほうがトラブルに巻き込まれにくい。
     resolve: {
-      extensions: ['.ts', '.js', '.json'] // 拡張子を配列で指定
+      extensions: ['.ts', '.js', '.json'], // 拡張子を配列で指定
+      alias: {
+        '@': path.resolve(__dirname, 'src/') // Adjust based on your directory structure
+      }
     },
     plugins: [
       new GasPlugin(),
