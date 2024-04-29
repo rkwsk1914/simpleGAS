@@ -81,7 +81,7 @@ export class LineApp {
         const number = Number(array[0])
 
         if (!isNaN(number)) {
-          this.gasController.addPayData(number, array[1] ?? '')
+          this.gasController.addPayData(number, array[1] ?? '', array[2] ?? '')
           return [MESSAGE.successAddPay]
         }
 
