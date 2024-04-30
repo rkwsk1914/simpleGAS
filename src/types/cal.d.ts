@@ -1,4 +1,5 @@
 export type CalDataType = {
+  month: string
   // 生活費
   lifePay: string
   // 支出

@@ -14,6 +14,8 @@ export class CreateDataMessage {
     return {
       type: 'text',
       text: `
+${data.month}
+
 生活費: ${data.lifePay}
 支出: ${data.pay}
 収入: ${data.income}
@@ -48,21 +50,21 @@ MTG代 ${data.detail.mtg}
   pay (data: CalDataType): MessagesType {
     return {
       type: 'text',
-      text: `残高: ${data.balance}\n\n生活費: ${data.lifePay}\n支出: ${data.pay}\n発生: ${data.detail.other}`
+      text: `${data.month}\n\n残高: ${data.balance}\n\n生活費: ${data.lifePay}\n支出: ${data.pay}\n発生: ${data.detail.other}`
     }
   }
 
   card (data: CalDataType): MessagesType {
     return {
       type: 'text',
-      text: `楽天: ${data.detail.card.raluten}\nライフ: ${data.detail.card.life}\nアプラス: ${data.detail.card.aplus}\nau: ${data.detail.card.au}\n`
+      text: `${data.month}\n\n楽天: ${data.detail.card.raluten}\nライフ: ${data.detail.card.life}\nアプラス: ${data.detail.card.aplus}\nau: ${data.detail.card.au}\n`
     }
   }
 
   debit (data: CalDataType): MessagesType {
     return {
       type: 'text',
-      text: `町田UFJ: ${data.debit.machida}\n横浜UFJ ${data.debit.yokohama}\nゆうちょ: ${data.debit.yucho}\nSBI: ${data.debit.sbi}`
+      text: `${data.month}\n\n町田UFJ: ${data.debit.machida}\n横浜UFJ ${data.debit.yokohama}\nゆうちょ: ${data.debit.yucho}\nSBI: ${data.debit.sbi}`
     }
   }
 }

@@ -1,7 +1,7 @@
 import { format } from 'date-fns'
 import formatNumber from 'format-number'
 
-import { BOOK_URL } from '@/const/Header'
+import { BOOK_URL, COL_A } from '@/const/Header'
 import { MONTH_COL } from '@/const/monthCol'
 
 import { Log } from '@/app/common/Log'
@@ -12,11 +12,13 @@ export class GASController {
   log: Log
   paySgs: SimpleGoogleSpreadsheet
   dataSgs: SimpleGoogleSpreadsheet
+  statusSgs: SimpleGoogleSpreadsheet
 
   constructor () {
     this.log = new Log('GASController')
     this.paySgs = new SimpleGoogleSpreadsheet(BOOK_URL, '発生支払い')
     this.dataSgs = new SimpleGoogleSpreadsheet(BOOK_URL, '残高計算')
+    this.statusSgs = new SimpleGoogleSpreadsheet(BOOK_URL, 'status')
   }
 
   addPayData (price: number, content?: string, credit?: string): void {
@@ -48,6 +50,7 @@ export class GASController {
     })
 
     const data: CalDataType = {
+      month: `${thisMonth}月`,
       // 生活費
       lifePay: myMoney(sheetData[1][0]),
       // 支出
@@ -95,5 +98,33 @@ export class GASController {
     }
     this.log.push([data])
     return data
+  }
+
+  getStatus (): string {
+    return this.statusSgs.doReadSS({
+      row: 1,
+      col: COL_A
+    })
+  }
+
+  setStatus (status: string) {
+    this.statusSgs.doWriteSS(status, 1, COL_A)
+  }
+
+  getSettingMonth (): number | undefined {
+    const value = this.statusSgs.doReadSS({
+      row: 2,
+      col: COL_A
+    })
+    const match = value.match(/^(\d{1,2})月$/)
+    if (match || match !== null) {
+      return Number(match[1])
+    }
+
+    return undefined
+  }
+
+  setSettingMonth (status: string) {
+    this.statusSgs.doWriteSS(status, 2, COL_A)
   }
 }

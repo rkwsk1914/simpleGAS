@@ -63,18 +63,65 @@ export class LineApp {
   }
 
   private __switchMessage (text: string): Array<MessagesType> {
+    const status = this.gasController.getStatus()
+    const settingMonth = this.gasController.getSettingMonth() ?? undefined
+
+    if (status === 'setMonth') {
+      const regex = /^(1|2|3|4|5|6|7|8|9|10|11|12)月$/
+      const isValid = regex.test(text)
+
+      if (!isValid) {
+        return [{
+          type: 'text',
+          text: '無効な値です。'
+        }]
+      }
+
+      this.gasController.setStatus('')
+      this.gasController.setSettingMonth(text)
+      return [{
+        type: 'text',
+        text: `${text} に変更しました。`
+      }]
+    }
+
     switch (text) {
+      case 'メニュー': {
+        return [{
+          type: 'text',
+          text: '以下のメッセージをしてください。\n月指定\n残高\nカード\n詳細\n引き落とし'
+        }]
+      }
+      case '月確認': {
+        if (!settingMonth) {
+          return [{
+            type: 'text',
+            text: '現在、月は設定されていません。\n\n今月のデータが参照できます。'
+          }]
+        }
+        return [{
+          type: 'text',
+          text: `${settingMonth}月が設定されています。`
+        }]
+      }
+      case '月指定': {
+        this.gasController.setStatus('setMonth')
+        return [{
+          type: 'text',
+          text: '月を指定してください。\n\nex) 1月、12月'
+        }]
+      }
       case '残高': {
-        return [this.createMessage.pay(this.gasController.getThisMonthData())]
+        return [this.createMessage.pay(this.gasController.getThisMonthData(settingMonth))]
       }
       case 'カード': {
-        return [this.createMessage.card(this.gasController.getThisMonthData())]
+        return [this.createMessage.card(this.gasController.getThisMonthData(settingMonth))]
       }
       case '詳細': {
-        return [this.createMessage.detail(this.gasController.getThisMonthData())]
+        return [this.createMessage.detail(this.gasController.getThisMonthData(settingMonth))]
       }
       case '引き落とし': {
-        return [this.createMessage.debit(this.gasController.getThisMonthData())]
+        return [this.createMessage.debit(this.gasController.getThisMonthData(settingMonth))]
       }
       default: {
         const array = text.split('\n')
