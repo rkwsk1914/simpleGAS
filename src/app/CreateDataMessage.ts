@@ -19,6 +19,7 @@ ${data.month}
 生活費: ${data.lifePay}
 支出: ${data.pay}
 収入: ${data.income}
+貯蓄: ${data.savings}
 残高: ${data.balance}
 総資産: ${data.assets}
 
@@ -42,6 +43,7 @@ MTG代 ${data.detail.mtg}
 ローン: ${data.detail.loan}
 家賃: ${data.detail.home}
 税金: ${data.detail.tax}
+ご飯会: ${data.detail.appointment}
 発生: ${data.detail.other}
       `
     }

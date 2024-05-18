@@ -65,6 +65,8 @@ export class LineApp {
   private __switchMessage (text: string): Array<MessagesType> {
     const status = this.gasController.getStatus()
     const settingMonth = this.gasController.getSettingMonth() ?? undefined
+    const nextMonth = settingMonth + 1 === 12 ? 1 : settingMonth + 1
+    const nextNextMonth = settingMonth + 2 === 12 ? 1 : settingMonth + 2
 
     if (status === 'setMonth') {
       const regex = /^(1|2|3|4|5|6|7|8|9|10|11|12)月$/
@@ -112,7 +114,11 @@ export class LineApp {
         }]
       }
       case '残高': {
-        return [this.createMessage.pay(this.gasController.getThisMonthData(settingMonth))]
+        return [
+          this.createMessage.pay(this.gasController.getThisMonthData(settingMonth)),
+          this.createMessage.pay(this.gasController.getThisMonthData(nextMonth)),
+          this.createMessage.pay(this.gasController.getThisMonthData(nextNextMonth))
+        ]
       }
       case 'カード': {
         return [this.createMessage.card(this.gasController.getThisMonthData(settingMonth))]

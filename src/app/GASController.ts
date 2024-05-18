@@ -39,14 +39,15 @@ export class GASController {
     const today = new Date()
     const thisMonth = month || today.getMonth() + 1
 
-    const sheetData = this.dataSgs.doReadSSVerString(MONTH_COL[thisMonth])
+    const sheetData = this.dataSgs.doReadSSVerString(MONTH_COL[thisMonth], true)
     this.log.push([MONTH_COL[thisMonth], sheetData])
     const myMoney = formatNumber({
       prefix: '¥',
       integerSeparator: ',',
       decimal: '.',
       decimalsSeparator: '',
-      padRight: 0
+      padRight: 0,
+      truncate: 0
     })
 
     const data: CalDataType = {
@@ -57,6 +58,8 @@ export class GASController {
       pay: myMoney(sheetData[2][0]),
       // 収入
       income: myMoney(sheetData[3][0]),
+      // 貯蓄
+      savings: myMoney(sheetData[5][0]),
       // 残高
       balance: myMoney(sheetData[7][0]),
       // 総資産
@@ -64,36 +67,38 @@ export class GASController {
       // 月末引き落とし
       debit: {
         // 町田UFJ
-        machida: myMoney(sheetData[10][0]),
+        machida: myMoney(sheetData[14][0]),
         // 横浜UFJ
-        yokohama: myMoney(sheetData[11][0]),
+        yokohama: myMoney(sheetData[15][0]),
         // ゆうちょ
-        yucho: myMoney(sheetData[12][0]),
+        yucho: myMoney(sheetData[16][0]),
         // SBI
-        sbi: myMoney(sheetData[13][0])
+        sbi: myMoney(sheetData[17][0])
       },
       // 詳細
       detail: {
         card: {
           // 楽天
-          raluten: myMoney(sheetData[14][0]),
+          raluten: myMoney(sheetData[18][0]),
           // ライフ
-          life: myMoney(sheetData[15][0]),
+          life: myMoney(sheetData[19][0]),
           // アプラス
-          aplus: myMoney(sheetData[16][0]),
+          aplus: myMoney(sheetData[20][0]),
           // au
-          au: myMoney(sheetData[17][0])
+          au: myMoney(sheetData[21][0])
         },
         // MTG
-        mtg: myMoney(sheetData[18][0]),
+        mtg: myMoney(sheetData[22][0]),
         // ローン
-        loan: myMoney(sheetData[19][0]),
+        loan: myMoney(sheetData[23][0]),
         // 家賃
-        home: myMoney(sheetData[20][0]),
+        home: myMoney(sheetData[24][0]),
         // 税金
-        tax: myMoney(sheetData[21][0]),
+        tax: myMoney(sheetData[25][0]),
         // 発生
-        other: myMoney(sheetData[28][0])
+        other: myMoney(sheetData[32][0]),
+        // ご飯会
+        appointment: myMoney(sheetData[37][0])
       }
     }
     this.log.push([data])

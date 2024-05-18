@@ -6,6 +6,8 @@ export type CalDataType = {
   pay: string
   // 収入
   income: string
+  // 貯蓄
+  savings: string
   // 残高
   balance: string
   // 総資産
@@ -43,5 +45,7 @@ export type CalDataType = {
     tax: string,
     // 発生
     other: string,
+    // ご飯会
+    appointment: string
   }
 }
