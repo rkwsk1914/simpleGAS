@@ -66,7 +66,12 @@ export class LineApp {
     const status = this.gasController.getStatus()
     const settingMonth = this.gasController.getSettingMonth() ?? undefined
     const nextMonth = settingMonth + 1 === 13 ? 1 : settingMonth + 1
-    const nextNextMonth = settingMonth + 2 === 13 ? 1 : settingMonth + 2
+    const nextNextMonth =
+      nextMonth + 1 === 13
+        ? 1
+        : nextMonth + 1 === 14
+          ? 2
+          : nextMonth + 1
 
     if (status === 'setMonth') {
       const regex = /^(1|2|3|4|5|6|7|8|9|10|11|12)月$/
