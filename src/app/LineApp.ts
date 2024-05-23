@@ -62,9 +62,14 @@ export class LineApp {
     }
   }
 
-  private __switchMessage (text: string): Array<MessagesType> {
-    const status = this.gasController.getStatus()
+  private _getMonthData (): {
+    settingMonth: number,
+    nextMonth: number,
+    nextNextMonth: number
+    } | undefined {
     const settingMonth = this.gasController.getSettingMonth() ?? undefined
+    if (!settingMonth) return undefined
+
     const nextMonth = settingMonth + 1 === 13 ? 1 : settingMonth + 1
     const nextNextMonth =
       nextMonth + 1 === 13
@@ -72,6 +77,21 @@ export class LineApp {
         : nextMonth + 1 === 14
           ? 2
           : nextMonth + 1
+    return {
+      settingMonth,
+      nextMonth,
+      nextNextMonth
+    }
+  }
+
+  private __switchMessage (text: string): Array<MessagesType> {
+    const status = this.gasController.getStatus()
+
+    const {
+      settingMonth,
+      nextMonth,
+      nextNextMonth
+    } = this._getMonthData()
 
     if (status === 'setMonth') {
       const regex = /^(1|2|3|4|5|6|7|8|9|10|11|12)月$/
@@ -199,9 +219,23 @@ export class LineApp {
   }
 
   public announceBalance (toId: string) {
+    const {
+      settingMonth,
+      nextMonth,
+      nextNextMonth
+    } = this._getMonthData()
+
     const postData = {
       to: toId,
-      messages: [this.createMessage.pay(this.gasController.getThisMonthData())]
+      messages: settingMonth
+        ? [
+            this.createMessage.pay(this.gasController.getThisMonthData(settingMonth)),
+            this.createMessage.pay(this.gasController.getThisMonthData(nextMonth)),
+            this.createMessage.pay(this.gasController.getThisMonthData(nextNextMonth))
+          ]
+        : [
+            this.createMessage.pay(this.gasController.getThisMonthData())
+          ]
     }
 
     const options = {
