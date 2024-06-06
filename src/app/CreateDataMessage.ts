@@ -43,7 +43,12 @@ SBI: ${data.debit.sbi}
 アプラス: ${data.card.aplus}
 au: ${data.card.au}
 ------------------------
-      `
+
+詳細
+------------------------
+${data.detail.map(item => `${item.name}: ${item.value}`).join('\n')}
+------------------------
+`
     }
   }
 

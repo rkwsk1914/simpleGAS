@@ -78,7 +78,7 @@ export class GASController {
         .map((row) => {
           return {
             name: row[1],
-            value: row[0]
+            value: myMoney(row[0])
           }
         })
     }
