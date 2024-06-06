@@ -16,12 +16,17 @@ export class CreateDataMessage {
       text: `
 ${data.month}
 
-生活費: ${data.lifePay}
-支出: ${data.pay}
 収入: ${data.income}
+支出: ${data.pay}
 貯蓄: ${data.savings}
+------------------------
+利益: ${data.profit}
 残高: ${data.balance}
-総資産: ${data.assets}
+
+貯蓄
+------------------------
+SBI貯蓄: ${data.savingDetail.savings}
+ウィーン: ${data.savingDetail.savingsVienna}
 
 月末引き落とし
 ------------------------
@@ -33,18 +38,11 @@ SBI: ${data.debit.sbi}
 
 クレジット
 ------------------------
-楽天: ${data.detail.card.raluten}
-ライフカード: ${data.detail.card.life}
-アプラス: ${data.detail.card.aplus}
-au: ${data.detail.card.au}
+楽天: ${data.card.raluten}
+ライフカード: ${data.card.life}
+アプラス: ${data.card.aplus}
+au: ${data.card.au}
 ------------------------
-
-MTG代 ${data.detail.mtg}
-ローン: ${data.detail.loan}
-家賃: ${data.detail.home}
-税金: ${data.detail.tax}
-ご飯会: ${data.detail.appointment}
-発生: ${data.detail.other}
       `
     }
   }
@@ -52,14 +50,28 @@ MTG代 ${data.detail.mtg}
   pay (data: CalDataType): MessagesType {
     return {
       type: 'text',
-      text: `${data.month}\n\n残高: ${data.balance}\n\n生活費: ${data.lifePay}\n支出: ${data.pay}\n発生: ${data.detail.other}`
+      text: `${data.month}
+
+残高: ${data.balance}
+
+収入: ${data.income}
+支出: ${data.pay}
+貯蓄: ${data.savings}
+------------------------
+利益: ${data.profit}
+
+貯蓄
+------------------------
+SBI貯蓄: ${data.savingDetail.savings}
+ウィーン: ${data.savingDetail.savingsVienna}
+`
     }
   }
 
   card (data: CalDataType): MessagesType {
     return {
       type: 'text',
-      text: `${data.month}\n\n楽天: ${data.detail.card.raluten}\nライフ: ${data.detail.card.life}\nアプラス: ${data.detail.card.aplus}\nau: ${data.detail.card.au}\n`
+      text: `${data.month}\n\n楽天: ${data.card.raluten}\nライフ: ${data.card.life}\nアプラス: ${data.card.aplus}\nau: ${data.card.au}\n`
     }
   }
 

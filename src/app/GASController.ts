@@ -52,54 +52,35 @@ export class GASController {
 
     const data: CalDataType = {
       month: `${thisMonth}月`,
-      // 生活費
-      lifePay: myMoney(sheetData[1][0]),
-      // 支出
-      pay: myMoney(sheetData[2][0]),
-      // 収入
-      income: myMoney(sheetData[3][0]),
-      // 貯蓄
-      savings: myMoney(sheetData[5][0]),
-      // 残高
-      balance: myMoney(sheetData[7][0]),
-      // 総資産
-      assets: myMoney(sheetData[8][0]),
-      // 月末引き落とし
-      debit: {
-        // 町田UFJ
-        machida: myMoney(sheetData[14][0]),
-        // 横浜UFJ
-        yokohama: myMoney(sheetData[15][0]),
-        // ゆうちょ
-        yucho: myMoney(sheetData[16][0]),
-        // SBI
-        sbi: myMoney(sheetData[17][0])
+      income: myMoney(sheetData[2][0]),
+      pay: myMoney(sheetData[3][0]),
+      savings: myMoney(sheetData[4][0]),
+      profit: myMoney(sheetData[5][0]),
+      balance: myMoney(sheetData[6][0]),
+      savingDetail: {
+        savings: myMoney(sheetData[14][0]),
+        savingsVienna: myMoney(sheetData[15][0])
       },
-      // 詳細
-      detail: {
-        card: {
-          // 楽天
-          raluten: myMoney(sheetData[18][0]),
-          // ライフ
-          life: myMoney(sheetData[19][0]),
-          // アプラス
-          aplus: myMoney(sheetData[20][0]),
-          // au
-          au: myMoney(sheetData[21][0])
-        },
-        // MTG
-        mtg: myMoney(sheetData[22][0]),
-        // ローン
-        loan: myMoney(sheetData[23][0]),
-        // 家賃
-        home: myMoney(sheetData[24][0]),
-        // 税金
-        tax: myMoney(sheetData[25][0]),
-        // 発生
-        other: myMoney(sheetData[32][0]),
-        // ご飯会
-        appointment: myMoney(sheetData[37][0])
-      }
+      debit: {
+        machida: myMoney(sheetData[9][1]),
+        yokohama: myMoney(sheetData[10][1]),
+        yucho: myMoney(sheetData[11][1]),
+        sbi: myMoney(sheetData[12][1])
+      },
+      card: {
+        raluten: myMoney(sheetData[21][0]),
+        life: myMoney(sheetData[22][0]),
+        aplus: myMoney(sheetData[23][0]),
+        au: myMoney(sheetData[24][0])
+      },
+      detail: sheetData
+        .filter((row, index) => index >= 25 && row[1] !== '')
+        .map((row) => {
+          return {
+            name: row[1],
+            value: row[0]
+          }
+        })
     }
     this.log.push([data])
     return data

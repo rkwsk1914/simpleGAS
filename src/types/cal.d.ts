@@ -1,17 +1,15 @@
 export type CalDataType = {
   month: string
-  // 生活費
-  lifePay: string
-  // 支出
-  pay: string
   // 収入
   income: string
-  // 貯蓄
+  // 支出
+  pay: string
+  // 今月の貯蓄
   savings: string
   // 残高
   balance: string
-  // 総資産
-  assets: string
+  // 利益
+  profit: string
   // 月末引き落とし
   debit: {
     // 町田UFJ
@@ -23,29 +21,27 @@ export type CalDataType = {
     // SBI
     sbi: string,
   }
-  // 詳細
-  detail: {
-    card: {
-      // 楽天
-      raluten: string,
-      // ライフ
-      life: string,
-      // アプラス
-      aplus: string,
-      // au
-      au: string,
-    }
-    // MTG
-    mtg: string,
-    // ローン
-    loan: string,
-    // 家賃
-    home: string,
-    // 税金
-    tax: string,
-    // 発生
-    other: string,
-    // ご飯会
-    appointment: string
+  // 貯蓄
+  savingDetail: {
+    // 今月の貯蓄
+    savings: string
+    // ウィーン
+    savingsVienna: string
   }
+  // クレジットカード
+  card: {
+    // 楽天
+    raluten: string,
+    // ライフ
+    life: string,
+    // アプラス
+    aplus: string,
+    // au
+    au: string,
+  }
+  // 詳細
+  detail?: Array<{
+    name: string,
+    value: string
+  }>,
 }

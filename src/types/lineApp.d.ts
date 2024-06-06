@@ -6,5 +6,4 @@ export type MessagesType = {
 export type UserDataType = {
   userId: string
   name: string
-
 }
