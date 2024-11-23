@@ -11,5 +11,7 @@ cp .env.temp .env
 
 ## 1-2. `.clasp.json`にスプレッドシートのidを設定
 
-
-#
+## 1-3. GASログイン
+```
+clasp login
+```
