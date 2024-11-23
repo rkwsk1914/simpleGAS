@@ -1,0 +1,44 @@
+{
+  "root": true,
+  "env": {
+    "es6": false,                   // ES6 構文を無効化（GAS は ES5 準拠）
+    "browser": false,               // ブラウザ環境は不要
+    "jquery": false,                 // jQuery 環境は不要
+    "node": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 5,              // GAS は ECMAScript 5 準拠
+    "sourceType": "script"         // `module` はサポートされないため "script"
+  },
+  "plugins": [
+    "@typescript-eslint"
+  ],
+  "rules": {
+    "no-console": ["error", { "allow": ["error", "log", "warn"] }], // console の一部使用を許可
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],    // 未使用の変数を許容（引数のみ）
+    "quotes": ["error", "single", { "avoidEscape": true }],        // シングルクォートを強制
+    "semi": ["error", "never"],                                   // セミコロンを使用しない
+    "object-curly-spacing": ["error", "always"],                  // オブジェクトの中括弧にスペース
+    "no-var": "error",                                            // `var` の使用を禁止
+    "prefer-const": "error",                                      // `const` の優先使用
+    "no-unused-expressions": "warn",                              // 不要な式は警告
+    "no-undef": "error",                                          // 定義されていない変数の使用を禁止
+    "no-shadow": "error",                                         // 変数のシャドーイングを禁止
+    "@typescript-eslint/no-explicit-any": "warn",                 // `any` 型の使用を警告
+    "@typescript-eslint/explicit-module-boundary-types": "off",   // 関数の戻り値型を必須としない
+    "@typescript-eslint/no-empty-function": "warn"                // 空の関数は警告
+  },
+  "globals": {
+    "GoogleAppsScript": "readonly",                               // GAS の型定義
+    "SpreadsheetApp": "readonly",
+    "Logger": "readonly",
+    "Utilities": "readonly",
+    "UrlFetchApp": "readonly",
+    "process": "readonly"
+  }
+}
