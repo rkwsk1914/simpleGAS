@@ -14,6 +14,7 @@
     "paths": {
       "@/*": ["./src/*"]
     },
+    "moduleResolution": "node"
   },
   "include": [
     "src/**/*.ts"                    // コンパイル対象のファイル
