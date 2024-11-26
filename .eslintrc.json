@@ -39,6 +39,7 @@
     "Logger": "readonly",
     "Utilities": "readonly",
     "UrlFetchApp": "readonly",
-    "process": "readonly"
+    "process": "readonly",
+    "global": "readonly"
   }
 }

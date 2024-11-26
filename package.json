@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint src --fix",
-    "build": "webpack --config webpack.config.gas.js",
+    "build": "webpack --config webpack.config.gas.js && clasp push",
     "push": "webpack --config webpack.config.gas.js && clasp push",
     "dev": "webpack --config webpack.config.gas.js --mode=development && clasp push",
     "watch": "webpack --watch --config webpack.config.gas.js --mode=development"
@@ -16,7 +16,7 @@
     "@babel/core": "^7.17.5",
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-typescript": "^7.16.7",
-    "@types/google-apps-script": "^1.0.82",
+    "@types/google-apps-script": "^1.0.85",
     "@types/jquery": "^3.5.14",
     "@types/node": "^20.12.4",
     "@typescript-eslint/eslint-plugin": "^7.5.0",
