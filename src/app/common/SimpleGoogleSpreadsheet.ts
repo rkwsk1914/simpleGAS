@@ -3,7 +3,7 @@ import * as HEAD from '@/const/Header'
 import Spreadsheet = GoogleAppsScript.Spreadsheet
 
 
-type CellType = Array<string | number>
+export type CellType = Array<string | number>
 
 /**
  * Google スプレッドシートAPI

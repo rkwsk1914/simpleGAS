@@ -44,7 +44,7 @@ export class LineApp {
     return false
   }
 
-  private __getUserData (userId: string): UserDataType | undefined {
+  private async __getUserData (userId: string): Promise<UserDataType | undefined> {
     if (!userId) return undefined
 
     const options: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
@@ -96,6 +96,28 @@ export class LineApp {
     if (!event.source.userId) return
 
     return event.message.text
+  }
+
+  public async getUserDataFromMessage (e: GoogleAppsScript.Events.DoPost): Promise<UserDataType | undefined> {
+    const data = JSON.parse(e.postData.contents)
+    const event = data.events[0]
+
+    if (event.message.type !== 'text') return
+
+    const userId = event.source.userId
+    if (!userId) return
+
+    this.log.push([{
+      userId
+    }])
+
+    const userData = await this.__getUserData(userId)
+
+    this.log.push([{
+      userData
+    }])
+
+    return userData
   }
 
   public checkMessageAndPost (e: GoogleAppsScript.Events.DoPost) {

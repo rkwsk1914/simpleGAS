@@ -1,20 +1,32 @@
-import { toZonedTime } from 'date-fns-tz'
-import { isWithinInterval, format, addDays } from 'date-fns'
+import {
+  isWithinInterval,
+  addDays,
+  isAfter,
+  isToday,
+  isEqual
+} from 'date-fns'
 
 import * as Header from '@/const/Header'
 
+import { formatStringDay, formatYyyyMmDd } from '@/utils/formatDay'
+
 import { Log } from '@/app/common/Log'
-import { SimpleGoogleSpreadsheet } from '@/app/common/SimpleGoogleSpreadsheet'
+import { SimpleGoogleSpreadsheet, CellType } from '@/app/common/SimpleGoogleSpreadsheet'
+
+import type { UserDataType } from '@/types/lineApp'
 export class GASController {
   log: Log
   scheduleSgs: SimpleGoogleSpreadsheet
   statusSgs: SimpleGoogleSpreadsheet
+  memberSgs : SimpleGoogleSpreadsheet
 
   constructor () {
     this.log = new Log('GASController')
     this.scheduleSgs = new SimpleGoogleSpreadsheet(Header.BOOK_URL, 'スケジュール')
     this.statusSgs = new SimpleGoogleSpreadsheet(Header.BOOK_URL, 'status')
+    this.memberSgs = new SimpleGoogleSpreadsheet(Header.BOOK_URL, 'メンバー')
   }
+
   getStatus (): string {
     return this.statusSgs.doReadSS({
       row: 1,
@@ -26,30 +38,123 @@ export class GASController {
     this.statusSgs.doWriteSS(status, 1, Header.COL_A)
   }
 
-  getCloseDeadLineData () {
+  getTodayDeadLineData (targetDay?: string): Array<CellType> {
     const data = this.scheduleSgs.doReadSS({
       row: 2,
       col: Header.COL_A,
-      endRow: 700,
+      endRow: this.scheduleSgs.doGetLastRow(2,1) ?? 1000,
       endCol: Header.COL_K,
     })
 
-    const closeDeadLineData = data.filter((item: Array<string>) => {
-      const timeZone = 'Asia/Tokyo'
-      const now = toZonedTime(new Date(), timeZone)
-      const today = format(now, 'yyyy-MM-dd HH:mm:ss')
-      const deadLineDay = addDays(today, 3)
+    const deadLineDay = formatStringDay({ targetDay })
+    if (!deadLineDay) return []
 
+    const todayDeadLineData = data.filter((item: Array<string>) => {
       if (!item[Header.ARRAY_COL_B]) return
 
-      const itemDay = format(item[Header.ARRAY_COL_B], 'yyyy-MM-dd HH:mm:ss')
+      const itemDay = formatYyyyMmDd({
+        targetDay: item[Header.ARRAY_COL_B]
+      })
 
-      if (isWithinInterval(itemDay, {
+      if (itemDay && isEqual(itemDay, deadLineDay)) return item
+    })
+
+    this.log.push(todayDeadLineData)
+    return todayDeadLineData
+  }
+
+  getCloseDeadLineData (interval: number = 3, targetDay?: string): Array<CellType> {
+    const data = this.scheduleSgs.doReadSS({
+      row: 2,
+      col: Header.COL_A,
+      endRow: this.scheduleSgs.doGetLastRow(2,1) ?? 1000,
+      endCol: Header.COL_K,
+    })
+
+    const today = formatStringDay({ targetDay })
+    if (!today) return []
+
+    const deadLineDay = addDays(today, interval)
+
+    const closeDeadLineData = data.filter((item: Array<string>) => {
+      if (!item[Header.ARRAY_COL_B]) return
+
+      const itemDay = formatYyyyMmDd({
+        targetDay: item[Header.ARRAY_COL_B]
+      })
+
+      if (itemDay && isWithinInterval(itemDay, {
         start: today,
         end: deadLineDay,
-      })) return item
+      }) && !isEqual(itemDay, today)) return item
     })
 
     this.log.push(closeDeadLineData)
+    return closeDeadLineData
+  }
+
+  getPossibleMTGData (targetDay?: string): Array<CellType> {
+    const data = this.scheduleSgs.doReadSS({
+      row: 2,
+      col: Header.COL_A,
+      endRow: this.scheduleSgs.doGetLastRow(2,1) ?? 1000,
+      endCol: Header.COL_K,
+    })
+
+    const today = formatStringDay({ targetDay })
+
+    const possibleMTGData = data.filter((item: Array<string>) => {
+      if (!item[Header.ARRAY_COL_B]) return
+
+      const itemDay = formatYyyyMmDd({
+        targetDay: item[Header.ARRAY_COL_B]
+      })
+
+      if (itemDay && today) {
+        if (isAfter(itemDay, today) || isToday(itemDay)) return item
+      }
+    })
+
+    this.log.push(possibleMTGData)
+    return possibleMTGData
+  }
+
+  getUndecidedMTGData (): Array<CellType> {
+    const data = this.scheduleSgs.doReadSS({
+      row: 2,
+      col: Header.COL_A,
+      endRow: this.scheduleSgs.doGetLastRow(2,1) ?? 1000,
+      endCol: Header.COL_K,
+    })
+
+    const undecidedMTGData = data.filter((item: Array<string>) => {
+      if (!item[Header.ARRAY_COL_B]) return item
+    })
+
+    this.log.push(undecidedMTGData)
+    return undecidedMTGData
+  }
+
+  setNewMember(user?: UserDataType) {
+    if (!user) return
+
+    const lastRow = this.memberSgs.doGetLastRow(2, Header.COL_A)
+    if (!lastRow) return
+
+    const data = this.memberSgs.doReadSS({
+      row: 2,
+      col: Header.COL_A,
+      endRow: lastRow,
+      endCol: Header.COL_F,
+    }) as Array<Array<string | number>>
+
+    const findUserRow = data.find((item ) =>
+      item[Header.ARRAY_COL_D] === user.userId
+    )
+
+    if (!findUserRow) {
+      this.memberSgs.doWriteSS(user.userId, lastRow, Header.COL_D)
+      this.memberSgs.doWriteSS(user.name, lastRow, Header.COL_E)
+    }
   }
 }
