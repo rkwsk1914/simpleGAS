@@ -1,12 +1,16 @@
 import { MY_ACCOUNT_ID } from '@/const/settings'
 
-// import { GASController } from '@/app/GASController'
+import { GASController } from '@/app/GASController'
 import { LineApp } from '@/app/LineApp'
 
 declare const global: any
 
 const LineApplication = new LineApp()
-// const gas = new GASController()
+const gas = new GASController()
+
+global.doTest = () => {
+  gas.getCloseDeadLineData()
+}
 
 global.doPost = (e: GoogleAppsScript.Events.DoPost) => {
   LineApplication.checkMessageAndPost(e)
