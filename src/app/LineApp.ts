@@ -86,6 +86,18 @@ export class LineApp {
     }
   }
 
+  public getMessage (e: GoogleAppsScript.Events.DoPost) {
+    const data = JSON.parse(e.postData.contents)
+    const event = data.events[0]
+
+    this.log.push([event])
+
+    if (event.message.type !== 'text') return
+    if (!event.source.userId) return
+
+    return event.message.text
+  }
+
   public checkMessageAndPost (e: GoogleAppsScript.Events.DoPost) {
     const data = JSON.parse(e.postData.contents)
     const event = data.events[0]
