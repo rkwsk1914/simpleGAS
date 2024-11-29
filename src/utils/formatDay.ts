@@ -1,6 +1,6 @@
 import { format, isValid, parseISO } from 'date-fns'
 
-const DEFAULT_FORMAT_STR = 'yyyy/MM/dd'
+const DEFAULT_FORMAT_STR = 'yyyy/M/d'
 
 /**
  * 文字列の日付をフォーマットする
