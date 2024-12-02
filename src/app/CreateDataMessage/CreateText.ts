@@ -1,4 +1,4 @@
-import { isBefore, format } from 'date-fns'
+import { isBefore, format, startOfDay } from 'date-fns'
 import { ja } from 'date-fns/locale'
 
 import { formatStringDay } from '@/utils/formatDay'
@@ -14,11 +14,13 @@ export class CreateText {
   today: string | undefined
   todayYear: string | undefined
   text: string
+  separateLine: string
   textTodayDead: string
   firstText: string
 
   constructor (targetDay?: string) {
     this.log = new Log('CreateText')
+    this.separateLine = '--------------------------------'
     this.text = ''
     this.textTodayDead = ''
     this.today = formatStringDay({ targetDay })
@@ -33,9 +35,19 @@ export class CreateText {
     if (this.text !== '') this.text = this.text + '\n\n\n'
   }
 
-  public addSeparate () {
-    if (this.text !== '') this.text = this.text +
-      '\n\n--------------------------------\n'
+  public addSeparate ({
+    isUnnecessaryEndNewLine = false
+  } : {
+    isUnnecessaryEndNewLine?: boolean
+  }) {
+    if (this.text !== '') {
+      if (isUnnecessaryEndNewLine) {
+        this.text = this.text + `\n\n${this.separateLine}`
+      }
+
+      this.text = this.text + `\n\n${this.separateLine}\n`
+      return
+    }
   }
 
   public addMTGMessage (array: Array<CellType>) {
@@ -100,6 +112,32 @@ export class CreateText {
     })
   }
 
+  private __getFee(element: CellType): string {
+    const localFee = element[Header.ARRAY_COL_J]
+    const zoomFee = element[Header.ARRAY_COL_K]
+
+    if (localFee === '' && zoomFee === '') return ''
+
+    const fee = (localFee === zoomFee) ?
+      localFee :
+      null
+
+    if (fee === 0) return '無料'
+
+    let result = ''
+    if (localFee !== '') {
+      result = result + `現地: ${localFee}円`
+    }
+
+    if (zoomFee !== '') {
+      result = result === '' ?
+        result + `zoom: ${zoomFee}円` :
+        result + `\nzoom: ${zoomFee}円`
+    }
+
+    return result
+  }
+
   public addScheduleMessage (array: Array<CellType>) {
     array.sort((a, b) => {
       const aDay = formatStringDay({
@@ -120,7 +158,8 @@ export class CreateText {
     this.log.push(array)
 
     let separateDate = ''
-    array.forEach((element, ) => {
+    let isSeparateDate = true
+    array.forEach((element) => {
       const title = element[Header.ARRAY_COL_A]
       const deadLineDate = element[Header.ARRAY_COL_B] ? '\n' + formatStringDay({
         targetDay: element[Header.ARRAY_COL_B] as string,
@@ -131,7 +170,7 @@ export class CreateText {
         targetDay: element[Header.ARRAY_COL_C] as string,
       })
 
-      if (!date || isBefore(date, this.today ?? new Date())) return
+      if (!date || isBefore(date, startOfDay(this.today ?? new Date()))) return
 
       const itemYear = formatStringDay({
         targetDay: date,
@@ -150,30 +189,26 @@ export class CreateText {
       const displayDate = this.todayYear === itemYear ? itemMothDay : date
       const ee = date ? format(date, 'EEE', { locale: ja }) : ''
 
-      const localFee = element[Header.ARRAY_COL_J]
-      const zoomFee = element[Header.ARRAY_COL_K]
-      const fee = (localFee === zoomFee) ?
-        localFee :
-        null
-
-      let firstLine = `${displayDate} (${ee})\n`
+      let firstLine = `${displayDate} (${ee})\n\n`
       if (separateDate === date) {
         firstLine = ''
+        isSeparateDate = false
       } else {
-        this.addSeparate()
+        this.addSeparate({
+          isUnnecessaryEndNewLine: false
+        })
+        isSeparateDate = true
       }
 
-      const secondLine = time ? '●' + firstLine + time + '~' : firstLine
+      const secondLine = time ? firstLine + '●' + time + '~' : firstLine
       const thirdLine = secondLine + '\n' + title + '\n'
-      const feeLine = fee === 0 ?
-        '無料' :
-        fee !== null ? `${fee}円` :
-        `現地: ${localFee}円\nzoom: ${zoomFee}円`
+      const feeLine = this.__getFee(element)
       const forthLine = thirdLine + feeLine + deadLineDate
-      this.text = this.text + `\n\n${forthLine}`
+      this.text = !isSeparateDate ?
+        this.text + `\n\n${forthLine}` :
+        this.text + `${forthLine}`
 
       separateDate = date
-    
     })
   }
 }

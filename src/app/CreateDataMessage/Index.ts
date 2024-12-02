@@ -46,19 +46,19 @@ export class CreateDataMessage {
     message.push(firstMessage)
 
     if (data.closeDead.length > 0) {
-      CT.addSeparate()
+      CT.addSeparate({})
       CT.text = CT.text + '⭐️そろそろ〆切！'
       CT.addMTGMessage(data.closeDead)
     }
 
     if (data.possible.length > 0) {
-      CT.addSeparate()
+      CT.addSeparate({})
       CT.text = CT.text + '🔴まだ申し込み受付中'
       CT.addMTGMessage(data.possible)
     }
 
     if (data.undecided.length > 0) {
-      CT.addSeparate()
+      CT.addSeparate({})
       CT.text = CT.text + '🔷〆切未定'
       CT.addMTGMessage(data.undecided)
     }
