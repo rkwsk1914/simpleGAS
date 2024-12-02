@@ -2,10 +2,15 @@
   "compilerOptions": {
     "target": "ES5",                 // Google Apps Script は ECMAScript 5 に準拠
     "module": "ES2015",                // モジュールはサポートされていないため "none" を設定
+    "esModuleInterop": true,
     "sourceMap": true,               // デバッグ用のソースマップを生成
     "strict": true,                  // 厳格な型チェックを有効化
     "lib": ["esnext"],               // 最新の ECMAScript 標準ライブラリを利用
-    "types": ["node", "google-apps-script"], // GAS の型定義を使用
+    "types": [
+      "node",
+      "google-apps-script", // GAS の型定義を使用
+      "jest"
+    ],
     "typeRoots": ["./node_modules/@types"], // 型定義のルートディレクトリ
     "allowJs": false,                // JS ファイルを許容しない
     "experimentalDecorators": true, // デコレーター構文を有効化（必要なら設定）
@@ -17,7 +22,7 @@
     "moduleResolution": "node"
   },
   "include": [
-    "src/**/*.ts"                    // コンパイル対象のファイル
+    "src/**/*.ts",                   // コンパイル対象のファイル
   ],
   "exclude": [
     "node_modules",                  // コンパイル対象外
