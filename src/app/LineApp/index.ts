@@ -1,4 +1,3 @@
-import { MESSAGE } from '@/const/Message'
 import { CHANNEL_ACCESS_TOKEN } from '@/const/settings'
 
 import { FetchFunction } from '@/app/common/fetch'
@@ -8,7 +7,9 @@ import { GASController } from '@/app/GASController'
 
 import type { MessagesType, UserDataType } from '@/types/lineApp'
 
-export class LineApp {
+import { SwitchPOSTMessage } from './SwitchPOSTMessage'
+
+export class LineApp extends SwitchPOSTMessage {
   urlData: Record<string, string>
   log: Log
   gasController: GASController
@@ -20,8 +21,10 @@ export class LineApp {
   }
 
   constructor () {
+    super()
     this.urlData = {
       reply: 'https://api.line.me/v2/bot/message/reply',
+      multicast: 'https://api.line.me/v2/bot/message/multicast',
       push: 'https://api.line.me/v2/bot/message/push',
       profile: 'https://api.line.me/v2/bot/profile/'
     }
@@ -62,30 +65,6 @@ export class LineApp {
     }
   }
 
-  private __switchMessage (text: string): Array<MessagesType> {
-    // const status = this.gasController.getStatus()
-
-    switch (text) {
-      case 'メニュー': {
-        return [{
-          type: 'text',
-          text: '以下のメッセージをしてください。\nメニュー1\nメニュー2\nメニュー3'
-        }]
-      }
-
-      default: {
-        const array = text.split('\n')
-        const number = Number(array[0])
-
-        if (!isNaN(number)) {
-          return [MESSAGE.successAddPay]
-        }
-
-        return [MESSAGE.failedAddPay]
-      }
-    }
-  }
-
   public getMessage (e: GoogleAppsScript.Events.DoPost) {
     const data = JSON.parse(e.postData.contents)
     const event = data.events[0]
@@ -101,6 +80,10 @@ export class LineApp {
   public async getUserDataFromMessage (e: GoogleAppsScript.Events.DoPost): Promise<UserDataType | undefined> {
     const data = JSON.parse(e.postData.contents)
     const event = data.events[0]
+
+    this.log.push(['LINEからメッセージ', {
+      data
+    }])
 
     if (event.message.type !== 'text') return
 
@@ -120,18 +103,24 @@ export class LineApp {
     return userData
   }
 
-  public checkMessageAndPost (e: GoogleAppsScript.Events.DoPost) {
+  public async getGroupDataFromMessage (e: GoogleAppsScript.Events.DoPost): Promise<string | undefined> {
     const data = JSON.parse(e.postData.contents)
     const event = data.events[0]
 
-    this.log.push([event])
+    this.log.push(['LINEからメッセージ', {
+      data
+    }])
 
-    if (event.message.type !== 'text') return
-    if (!event.source.userId) return
+    if (!event.source && event.source.type !== 'group') return
 
-    const messages = this.__switchMessage(event.message.text)
+    const groupId = event.source.groupId
+    if (!groupId) return
 
-    this.reply(e, messages)
+    this.log.push([{
+      groupId
+    }])
+
+    return groupId
   }
 
   public reply (e: GoogleAppsScript.Events.DoPost, messages: Array<MessagesType>) {
@@ -168,5 +157,23 @@ export class LineApp {
     }
 
     this.fetchFunction.doPost({ url: this.urlData.push, options })
+  }
+
+  public multicast (toIds: Array<string>, messages: Array<MessagesType>) {
+    if (toIds.length === 0) return
+    if (this.__checkMessagesUndefined(messages)) return
+
+    const postData = {
+      to: toIds,
+      messages
+    }
+
+    const options: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
+      method: 'post',
+      headers: this.HEADERS,
+      payload: JSON.stringify(postData)
+    }
+
+    this.fetchFunction.doPost({ url: this.urlData.multicast, options })
   }
 }

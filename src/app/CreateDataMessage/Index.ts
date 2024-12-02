@@ -79,4 +79,34 @@ export class CreateDataMessage {
 
     return message
   }
+
+  public pushTodayDeadlineInfo (targetDay?: string): Array<MessagesType> | null {
+    const CT = new CreateText(targetDay)
+    const message: Array<MessagesType> = []
+
+    const data = {
+      todayDead: this.gas.getTodayDeadLineData(targetDay),
+    }
+
+    if ( data.todayDead.length === 0) {
+      return null
+    }
+
+    const firstMessage: MessagesType = {
+      type: 'text',
+      text: CT.firstText
+    }
+    message.push(firstMessage)
+
+    if (data.todayDead.length > 0) {
+      CT.textTodayDead = CT.textTodayDead + '⚠️今日〆切！'
+      CT.addTodayDeadMessage(data.todayDead)
+      message.push({
+        type: 'text',
+        text: CT.textTodayDead
+      })
+    }
+
+    return message
+  }
 }

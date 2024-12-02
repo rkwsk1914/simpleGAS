@@ -18,13 +18,15 @@ export class GASController {
   log: Log
   scheduleSgs: SimpleGoogleSpreadsheet
   statusSgs: SimpleGoogleSpreadsheet
-  memberSgs : SimpleGoogleSpreadsheet
+  memberSgs: SimpleGoogleSpreadsheet
+  lineGroupSgs: SimpleGoogleSpreadsheet
 
   constructor () {
     this.log = new Log('GASController')
     this.scheduleSgs = new SimpleGoogleSpreadsheet(Header.BOOK_URL, 'スケジュール')
     this.statusSgs = new SimpleGoogleSpreadsheet(Header.BOOK_URL, 'status')
     this.memberSgs = new SimpleGoogleSpreadsheet(Header.BOOK_URL, 'メンバー')
+    this.lineGroupSgs = new SimpleGoogleSpreadsheet(Header.BOOK_URL, 'lineGroup')
   }
 
   getStatus (): string {
@@ -156,5 +158,33 @@ export class GASController {
       this.memberSgs.doWriteSS(user.userId, lastRow, Header.COL_D)
       this.memberSgs.doWriteSS(user.name, lastRow, Header.COL_E)
     }
+  }
+
+  setGroupData(groupId: string) {
+
+    const lastRow = this.lineGroupSgs.doGetLastRow(2, Header.COL_A)
+    if (!lastRow) return
+
+    this.lineGroupSgs.doWriteSS(groupId, lastRow, Header.COL_A)
+  }
+
+  getGroupIds(): Array<string> | null {
+    const lastRow = this.lineGroupSgs.doGetLastRow(2, Header.COL_A)
+    if (!lastRow) return null
+
+    const ids: Array<string> = []
+    const data: Array<CellType> = this.lineGroupSgs.doReadSS({
+      row: 2,
+      col: Header.COL_A,
+      endRow: lastRow,
+      endCol: Header.COL_A
+    })
+
+    data.map((item) => {
+      const id = item[0]
+      if(id && id !== '') ids.push(String(id))
+    })
+
+    return ids
   }
 }

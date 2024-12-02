@@ -23,7 +23,7 @@ export class CreateText {
       targetDay: this.today,
       formatStr: 'yyyy'
     })
-    this.firstText = `${this.today}時点\n近日中のMTG情報です！\n\n【開催日】内容`
+    this.firstText = `${this.today}時点\n近日中のMTG情報です！\n\n【開催日時】内容`
   }
 
   public addLine () {
@@ -93,7 +93,7 @@ export class CreateText {
       const day = time ? `${displayDate} ${time}` : displayDate
 
       const mtgInfo = `【${day}】\n${title}`
-      this.textTodayDead = this.textTodayDead + `\n\n${mtgInfo}`
+      this.textTodayDead = this.textTodayDead + `\n\n${mtgInfo}\n\nノートをご確認ください。`
     })
   }
 }
