@@ -4,6 +4,7 @@ import { LineApp } from '@/app/LineApp'
 import { CreateDataMessage } from '@/app/CreateDataMessage'
 
 import type { MessagesType } from '@/types/lineApp'
+import { SelectMenu } from '@/types/selectMenu'
 
 export class SwitchPOSTMessage {
   log: Log
@@ -36,10 +37,101 @@ export class SwitchPOSTMessage {
   }
 
   private async __setting(userId: string): Promise<Array<MessagesType>> {
-    this.gasController.setStatus('setting', userId)
+    const gas = new GASController()
+    gas.setStatus('setting', userId)
+    const setting = gas.getSetting(userId)
+    const text1 = setting ?
+      '現在の通知設定です。\n\n' + setting :
+      `【初期設定（${SelectMenu.deadline}）】`
+
+      const text2 = '好きな通知設定を選んでください。\n\n' +
+      `1. ${SelectMenu.deadline}` + '\n' +
+      `2. ${SelectMenu.todayDeadline}` + '\n' +
+      `3. ${SelectMenu.schedule}` + '\n' +
+      `4. ${SelectMenu.cancel}`
+
     return [{
       type: 'text',
-      text: '開発中'
+      text: text1
+    },{
+      type: 'text',
+      text: text2
+    }]
+  }
+
+  private async __switchSetting ({
+    text,
+    userId,
+  }: {
+    text: string
+    userId: string,
+  }): Promise<Array<MessagesType>> {
+    const gas = new GASController()
+    gas.setStatus('', userId)
+    const setting = gas.getSetting(userId)
+    switch (text) {
+      case '1':
+      case '１':
+      case SelectMenu.deadline: {
+        this.gasController.setSetting(SelectMenu.deadline, userId)
+        break
+      }
+      case '2':
+      case '２':
+      case SelectMenu.todayDeadline: {
+        this.gasController.setSetting(SelectMenu.todayDeadline, userId)
+        break
+      }
+      case '3':
+      case '３':
+      case SelectMenu.schedule: {
+        this.gasController.setSetting(SelectMenu.schedule, userId)
+        break
+      }
+      case '4':
+      case '４':
+      case SelectMenu.cancel:
+      case 'キャンセル': {
+        return [{
+          type: 'text',
+          text: 'キャンセルしました'
+        }, {
+          type: 'text',
+          text:  '現在の通知設定です。\n\n' + setting
+        }]
+      }
+      case SelectMenu.getDeadline:
+      case SelectMenu.getTodayDeadline:
+      case SelectMenu.getSchedule:
+      case SelectMenu.setting: {
+        const missSelectMessage: Array<MessagesType> = []
+        missSelectMessage.push({
+          type: 'text',
+          text: 'ちょいまち！\n先に通知設定を完了してね！'
+        })
+        const settingMessage = await this.__setting(userId)
+        this.log.push(['__switchSetting', settingMessage])
+        return [...missSelectMessage, ...settingMessage]
+      }
+      default: {
+        const missSelectMessage: Array<MessagesType> = []
+        missSelectMessage.push({
+          type: 'text',
+          text: '無効な入力です。1~4の数字で選択してください。'
+        })
+        const settingMessage = await this.__setting(userId)
+        this.log.push(['__switchSetting', settingMessage])
+        return [...missSelectMessage, ...settingMessage]
+      }
+    }
+
+    const newSetting = gas.getSetting(userId)
+    return [{
+      type: 'text',
+      text: '通知設定を変更しました！'
+    }, {
+      type: 'text',
+      text:  '現在の通知設定です。\n\n' + newSetting
     }]
   }
 
@@ -57,24 +149,22 @@ export class SwitchPOSTMessage {
       setting?: (_userId: string) => Promise<Array<MessagesType>>,
     }
   }): Promise<Array<MessagesType> | null> {
-    this.gasController.setStatus('', userId)
-
     switch (text) {
-      case '本日〆切': {
+      case SelectMenu.getTodayDeadline: {
         if (callBack && callBack.todayDeadline) return await callBack.todayDeadline()
         break
       }
-      case '〆切': {
+      case SelectMenu.getDeadline: {
         this.log.push(['〆切メニュー選択', callBack?.getDeadline ? true : false])
         if (callBack && callBack.getDeadline) return await callBack.getDeadline()
         break
       }
-      case 'MTG情報': {
+      case SelectMenu.getSchedule: {
         this.log.push(['MTG情報メニュー選択'])
         if (callBack && callBack.mtgInfo) return await callBack.mtgInfo()
         break
       }
-      case '通知設定': {
+      case SelectMenu.setting: {
         this.log.push(['通知設定メニュー選択'])
         if (callBack && callBack.setting) return await callBack.setting(userId)
         break
@@ -114,7 +204,6 @@ export class SwitchPOSTMessage {
     const data = JSON.parse(e.postData.contents)
     const event = data.events[0]
     const text = event.message.text
-    // const status = this.gasController.getStatus(userId)
 
     const switchMenuMessage = () => this.__switchMenuMessage({
       userId,
@@ -126,6 +215,25 @@ export class SwitchPOSTMessage {
         setting: this.__setting
       }
     })
+
+    const status = this.gasController.getStatus(userId)
+
+    switch (status) {
+      case 'setting': {
+        this.log.push(['設定変更中'])
+        const message = await this.__switchSetting({
+          text,
+          userId,
+        })
+        return {
+          message,
+          userId
+        }
+      }
+      default: {
+        break
+      }
+    }
 
     switch (text) {
       case 'メニュー': {

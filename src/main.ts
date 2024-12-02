@@ -6,6 +6,8 @@ import { CreateDataMessage } from '@/app/CreateDataMessage'
 import { SwitchPOSTMessage } from '@/app/SwitchPOSTMessage'
 import { Log } from '@/app/common/Log'
 
+import { SelectMenu } from '@/types/selectMenu'
+
 declare const global: any
 
 const LineApplication = new LineApp()
@@ -71,6 +73,7 @@ global.doTest = async () => {
   }
   */
 
+  /*
   const e2: GoogleAppsScript.Events.DoPost = {
     postData: {
       contents: JSON.stringify({
@@ -109,9 +112,12 @@ global.doTest = async () => {
     parameters: {},
     pathInfo: '', // 必須プロパティを追加
   }
+  */
 
-  const message = await checkMessage(e2)
-  log.push([message])
+  // const message = await checkMessage(e2)
+  // log.push([message])
+
+  gas.setStatus('setting', MY_ACCOUNT_ID ?? '')
 }
 
 global.doPost = async (e: GoogleAppsScript.Events.DoPost) => {
@@ -133,9 +139,37 @@ global.doPostMessages = () => {
   }])
 }
 
-global.doPostMTGInfo = () => {
+global.doPostDeadLineInfo = () => {
   const message = CreateMessage.pushMtgInfo()
-  const ids = gas.getUserIds()
+  const ids = gas.getUserIds({
+    filterSetting: SelectMenu.deadline
+  })
+
+  log.push([message, ids])
+  if (!ids || ids?.length === 0) return
+
+  LineApplication.multicast(ids, message)
+}
+
+global.doPostTodayDeadLineInfo = () => {
+  const message = CreateMessage.pushTodayDeadlineInfo()
+  if (!message) return
+
+  const ids = gas.getUserIds({
+    filterSetting: SelectMenu.todayDeadline
+  })
+
+  log.push([message, ids])
+  if (!ids || ids?.length === 0) return
+
+  LineApplication.multicast(ids, message)
+}
+
+global.doPostScheduleInfo = () => {
+  const message = CreateMessage.pushSchedule()
+  const ids = gas.getUserIds({
+    filterSetting: SelectMenu.schedule
+  })
 
   log.push([message, ids])
   if (!ids || ids?.length === 0) return

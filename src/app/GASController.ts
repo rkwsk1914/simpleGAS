@@ -14,6 +14,7 @@ import { Log } from '@/app/common/Log'
 import { SimpleGoogleSpreadsheet, CellType } from '@/app/common/SimpleGoogleSpreadsheet'
 
 import type { UserDataType } from '@/types/lineApp'
+import { SelectMenu } from '@/types/selectMenu'
 export class GASController {
   log: Log
   scheduleSgs: SimpleGoogleSpreadsheet
@@ -27,7 +28,10 @@ export class GASController {
     this.lineGroupSgs = new SimpleGoogleSpreadsheet(Header.BOOK_URL, 'lineGroup')
   }
 
-  getStatus (userId: string): string | null {
+  private __findUserData(userId: string): {
+    userData: CellType
+    row: number
+  } | null {
     const lastRow = this.memberSgs.doGetLastRow(2, Header.COL_A)
     if (!lastRow) return null
 
@@ -35,31 +39,50 @@ export class GASController {
       row: 2,
       col: Header.COL_A,
       endRow: lastRow,
-      endCol: Header.COL_A
+      endCol: Header.COL_G
     })
 
-    const userData = data.find((item) => item[Header.COL_D] === userId)
+    const userData = data.find((item) => item[Header.ARRAY_COL_D] === userId)
     if (!userData) return null
 
-    const status = String(userData[Header.COL_F])
+    const index = data.findIndex((item) => item[Header.ARRAY_COL_D] === userId)
+    const row = index + 2
+
+    return {
+      userData,
+      row
+    }
+  }
+
+  getStatus (userId: string): string | null {
+    const data = this.__findUserData(userId)
+    const status = data?.userData && data.userData[Header.ARRAY_COL_F] ?
+      String(data.userData[Header.ARRAY_COL_F]) :
+      null
     return status
   }
 
   setStatus (status: string, userId: string) {
-    const lastRow = this.memberSgs.doGetLastRow(2, Header.COL_A)
-    if (!lastRow) return null
+    const data = this.__findUserData(userId)
+    if (data) this.memberSgs.doWriteSS(status, data?.row, Header.COL_F)
+  }
 
-    const data: Array<CellType> = this.memberSgs.doReadSS({
-      row: 2,
-      col: Header.COL_A,
-      endRow: lastRow,
-      endCol: Header.COL_A
-    })
+  getSetting (userId: string): string | null {
+    const data = this.__findUserData(userId)
+    const setting = data?.userData && data.userData[Header.ARRAY_COL_G]
+      ? String(data.userData[Header.ARRAY_COL_G]) :
+      null
 
-    const userDataIndex = data.findIndex((item) => item[Header.COL_D] === userId)
-    if (userDataIndex === -1) return null
+    const result = setting ? setting : SelectMenu.deadline
+    if (setting === null) this.setSetting(SelectMenu.deadline, userId)
 
-    this.memberSgs.doWriteSS(status, userDataIndex + 2, Header.COL_F)
+    this.log.push(['現在の通知設定', result])
+    return result
+  }
+
+  setSetting (setting: string, userId: string) {
+    const data = this.__findUserData(userId)
+    if (data) this.memberSgs.doWriteSS(setting, data?.row, Header.COL_G)
   }
 
   getTodayDeadLineData (targetDay?: string): Array<CellType> {
@@ -189,6 +212,7 @@ export class GASController {
     if (!findUserRow) {
       this.memberSgs.doWriteSS(user.userId, lastRow, Header.COL_D)
       this.memberSgs.doWriteSS(user.name, lastRow, Header.COL_E)
+      this.memberSgs.doWriteSS(SelectMenu.deadline, lastRow, Header.COL_G)
     }
   }
 
@@ -220,7 +244,11 @@ export class GASController {
     return ids
   }
 
-  getUserIds(): Array<string> | null {
+  getUserIds({
+    filterSetting
+  }: {
+    filterSetting?: string
+  }): Array<string> | null {
     const lastRow = this.memberSgs.doGetLastRow(2, Header.COL_A)
     if (!lastRow) return null
 
@@ -229,12 +257,23 @@ export class GASController {
       row: 2,
       col: Header.COL_A,
       endRow: lastRow,
-      endCol: Header.COL_D
+      endCol: Header.COL_G
     })
 
     data.map((item) => {
       const id = item[Header.ARRAY_COL_D]
-      if(id && id !== '') ids.push(String(id))
+      const status = item[Header.ARRAY_COL_F]
+
+      if(id && id !== '' && status === '') {
+        if (filterSetting) {
+          const setting = item[Header.ARRAY_COL_G]
+          if (setting === filterSetting) ids.push(String(id))
+          return
+        }
+
+        ids.push(String(id))
+        return
+      }
     })
 
     return ids
