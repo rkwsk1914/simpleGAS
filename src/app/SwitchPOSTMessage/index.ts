@@ -16,6 +16,15 @@ export class SwitchPOSTMessage {
     this.LineApplication = new LineApp()
   }
 
+  private async __getTodayDeadline(): Promise<Array<MessagesType>> {
+    const createMessage = new CreateDataMessage()
+    const message = createMessage.pushTodayDeadlineInfo()
+    return message ? message : [{
+      type: 'text',
+      text: 'ご安心を！\n本日〆切のMTGはありません'
+    }]
+  }
+
   private async __getDeadline(): Promise<Array<MessagesType>> {
     const createMessage = new CreateDataMessage()
     return createMessage.pushMtgInfo()
@@ -42,6 +51,7 @@ export class SwitchPOSTMessage {
     text: string
     userId: string,
     callBack?: {
+      todayDeadline?: () => Promise<Array<MessagesType>>,
       getDeadline?: () => Promise<Array<MessagesType>>,
       mtgInfo?: () => Promise<Array<MessagesType>>,
       setting?: (_userId: string) => Promise<Array<MessagesType>>,
@@ -50,6 +60,10 @@ export class SwitchPOSTMessage {
     this.gasController.setStatus('', userId)
 
     switch (text) {
+      case '本日〆切': {
+        if (callBack && callBack.todayDeadline) return await callBack.todayDeadline()
+        break
+      }
       case '〆切': {
         this.log.push(['〆切メニュー選択', callBack?.getDeadline ? true : false])
         if (callBack && callBack.getDeadline) return await callBack.getDeadline()
@@ -106,6 +120,7 @@ export class SwitchPOSTMessage {
       userId,
       text,
       callBack: {
+        todayDeadline: this.__getTodayDeadline,
         getDeadline: this.__getDeadline,
         mtgInfo: this.__mtgInfo,
         setting: this.__setting
