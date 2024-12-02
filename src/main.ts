@@ -3,17 +3,37 @@ import { MY_ACCOUNT_ID } from '@/const/settings'
 import { GASController } from '@/app/GASController'
 import { LineApp } from '@/app/LineApp'
 import { CreateDataMessage } from '@/app/CreateDataMessage'
+import { SwitchPOSTMessage } from '@/app/SwitchPOSTMessage'
 
 declare const global: any
 
 const LineApplication = new LineApp()
 const gas = new GASController()
 const CreateMessage = new CreateDataMessage()
+const SwitchPOSTMessageApp = new SwitchPOSTMessage()
+
+const checkMessage = async(e: GoogleAppsScript.Events.DoPost) => await SwitchPOSTMessageApp.checkMessageAndPost({
+  e,
+  callBack: {
+    message: async () => {
+      const user = await LineApplication.getUserDataFromMessage(e)
+      gas.setNewMember(user)
+    },
+    join: async() => {
+      const group = await LineApplication.getGroupData(e)
+      if (group?.groupId) gas.setGroupData(group.groupId)
+    },
+    follow: async () => {
+      const user = await LineApplication.getUserDataFromFollow(e)
+      gas.setNewMember(user)
+    }
+  }
+})
+
 
 global.doTest = async () => {
   // const message2 = CreateMessage.pushMtgInfo('2024/11/28')
   // LineApplication.post(MY_ACCOUNT_ID ?? '', message2)
-
 
   const e: GoogleAppsScript.Events.DoPost = {
     parameter: {},
@@ -45,27 +65,12 @@ global.doTest = async () => {
     queryString: '',
     pathInfo: '', // 必須プロパティを追加
   }
-
-  await LineApplication.checkMessageAndPost({
-    e,
-    callBack: {
-      message: async () => {
-        console.log('IN message', e)
-        LineApplication.getMessage(e)
-        const user = await LineApplication.getUserDataFromMessage(e)
-        gas.setNewMember(user)
-      },
-      join: async() => {
-        console.log('IN join', e)
-        const groupId = await LineApplication.getGroupDataFromMessage(e)
-        console.log(groupId)
-        if (groupId) gas.setGroupData(groupId)
-      }
-    }
-  })
+  await checkMessage(e)
 }
 
-// global.doPost = async (e: GoogleAppsScript.Events.DoPost) => {}
+global.doPost = async (e: GoogleAppsScript.Events.DoPost) => {
+  await checkMessage(e)
+}
 
 global.doPostMessages = () => {
   LineApplication.post(MY_ACCOUNT_ID ?? '', [{

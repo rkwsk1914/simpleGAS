@@ -8,8 +8,7 @@ export type UserDataType = {
   name: string
 }
 
-type callBackType = (() => void) | (() => Promise<void>)
-export type MessageReplyCallBackType = {
-  default: callBackType | null;
-  menu: callBackType | null;
-} | Record<string, callBackType>;
+export type GroupDataType = {
+  groupId: string
+  groupName: string
+}

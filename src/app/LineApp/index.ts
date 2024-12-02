@@ -3,16 +3,12 @@ import { CHANNEL_ACCESS_TOKEN } from '@/const/settings'
 import { FetchFunction } from '@/app/common/fetch'
 import { Log } from '@/app/common/Log'
 import { CreateDataMessage } from '@/app/CreateDataMessage'
-import { GASController } from '@/app/GASController'
 
-import type { MessagesType, UserDataType } from '@/types/lineApp'
+import type { MessagesType, UserDataType, GroupDataType } from '@/types/lineApp'
 
-import { SwitchPOSTMessage } from './SwitchPOSTMessage'
-
-export class LineApp extends SwitchPOSTMessage {
+export class LineApp {
   urlData: Record<string, string>
   log: Log
-  gasController: GASController
   fetchFunction: FetchFunction
   createMessage :CreateDataMessage
   HEADERS: {
@@ -21,17 +17,16 @@ export class LineApp extends SwitchPOSTMessage {
   }
 
   constructor () {
-    super()
     this.urlData = {
       reply: 'https://api.line.me/v2/bot/message/reply',
       multicast: 'https://api.line.me/v2/bot/message/multicast',
       push: 'https://api.line.me/v2/bot/message/push',
-      profile: 'https://api.line.me/v2/bot/profile/'
+      profile: 'https://api.line.me/v2/bot/profile/',
+      groupSummary: 'https://api.line.me/v2/bot/group/'
     }
 
     this.log = new Log('LineApp')
     this.fetchFunction = new FetchFunction()
-    this.gasController = new GASController()
     this.createMessage = new CreateDataMessage()
 
     this.HEADERS = {
@@ -65,6 +60,24 @@ export class LineApp extends SwitchPOSTMessage {
     }
   }
 
+  private async __getGroupData (groupId: string): Promise<GroupDataType | undefined> {
+    if (!groupId) return undefined
+
+    const options: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
+      method: 'get',
+      headers: this.HEADERS
+    }
+    const url = this.urlData.group + '/' + groupId + '/summary'
+    const res = this.fetchFunction.doGet({ url, options })
+
+    if (!res.groupId) return undefined
+
+    return {
+      groupId: res.groupId,
+      groupName: res.groupName
+    }
+  }
+
   public getMessage (e: GoogleAppsScript.Events.DoPost) {
     const data = JSON.parse(e.postData.contents)
     const event = data.events[0]
@@ -75,6 +88,32 @@ export class LineApp extends SwitchPOSTMessage {
     if (!event.source.userId) return
 
     return event.message.text
+  }
+
+  public async getUserDataFromFollow (e: GoogleAppsScript.Events.DoPost): Promise<UserDataType | undefined> {
+    const data = JSON.parse(e.postData.contents)
+    const event = data.events[0]
+
+    this.log.push(['フォローされました', {
+      data
+    }])
+
+    if (event.message.type !== 'follow') return
+
+    const userId = event.source.userId
+    if (!userId) return
+
+    this.log.push([{
+      userId
+    }])
+
+    const userData = await this.__getUserData(userId)
+
+    this.log.push([{
+      userData
+    }])
+
+    return userData
   }
 
   public async getUserDataFromMessage (e: GoogleAppsScript.Events.DoPost): Promise<UserDataType | undefined> {
@@ -103,7 +142,7 @@ export class LineApp extends SwitchPOSTMessage {
     return userData
   }
 
-  public async getGroupDataFromMessage (e: GoogleAppsScript.Events.DoPost): Promise<string | undefined> {
+  public async getGroupData (e: GoogleAppsScript.Events.DoPost): Promise<GroupDataType | undefined> {
     const data = JSON.parse(e.postData.contents)
     const event = data.events[0]
 
@@ -120,7 +159,9 @@ export class LineApp extends SwitchPOSTMessage {
       groupId
     }])
 
-    return groupId
+    const group = await this.__getGroupData(groupId)
+
+    return group
   }
 
   public reply (e: GoogleAppsScript.Events.DoPost, messages: Array<MessagesType>) {

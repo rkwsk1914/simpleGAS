@@ -17,27 +17,49 @@ import type { UserDataType } from '@/types/lineApp'
 export class GASController {
   log: Log
   scheduleSgs: SimpleGoogleSpreadsheet
-  statusSgs: SimpleGoogleSpreadsheet
   memberSgs: SimpleGoogleSpreadsheet
   lineGroupSgs: SimpleGoogleSpreadsheet
 
   constructor () {
     this.log = new Log('GASController')
     this.scheduleSgs = new SimpleGoogleSpreadsheet(Header.BOOK_URL, 'スケジュール')
-    this.statusSgs = new SimpleGoogleSpreadsheet(Header.BOOK_URL, 'status')
     this.memberSgs = new SimpleGoogleSpreadsheet(Header.BOOK_URL, 'メンバー')
     this.lineGroupSgs = new SimpleGoogleSpreadsheet(Header.BOOK_URL, 'lineGroup')
   }
 
-  getStatus (): string {
-    return this.statusSgs.doReadSS({
-      row: 1,
-      col: Header.COL_A
+  getStatus (userId: string): string | null {
+    const lastRow = this.memberSgs.doGetLastRow(2, Header.COL_A)
+    if (!lastRow) return null
+
+    const data: Array<CellType> = this.memberSgs.doReadSS({
+      row: 2,
+      col: Header.COL_A,
+      endRow: lastRow,
+      endCol: Header.COL_A
     })
+
+    const userData = data.find((item) => item[Header.COL_D] === userId)
+    if (!userData) return null
+
+    const status = String(userData[Header.COL_F])
+    return status
   }
 
-  setStatus (status: string) {
-    this.statusSgs.doWriteSS(status, 1, Header.COL_A)
+  setStatus (status: string, userId: string) {
+    const lastRow = this.memberSgs.doGetLastRow(2, Header.COL_A)
+    if (!lastRow) return null
+
+    const data: Array<CellType> = this.memberSgs.doReadSS({
+      row: 2,
+      col: Header.COL_A,
+      endRow: lastRow,
+      endCol: Header.COL_A
+    })
+
+    const userDataIndex = data.findIndex((item) => item[Header.COL_D] === userId)
+    if (userDataIndex === -1) return null
+
+    this.memberSgs.doWriteSS(status, userDataIndex + 2, Header.COL_F)
   }
 
   getTodayDeadLineData (targetDay?: string): Array<CellType> {
