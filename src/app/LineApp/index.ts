@@ -22,7 +22,7 @@ export class LineApp {
       multicast: 'https://api.line.me/v2/bot/message/multicast',
       push: 'https://api.line.me/v2/bot/message/push',
       profile: 'https://api.line.me/v2/bot/profile/',
-      groupSummary: 'https://api.line.me/v2/bot/group/'
+      group: 'https://api.line.me/v2/bot/group/'
     }
 
     this.log = new Log('LineApp')
@@ -146,7 +146,7 @@ export class LineApp {
     const data = JSON.parse(e.postData.contents)
     const event = data.events[0]
 
-    this.log.push(['LINEからメッセージ', {
+    this.log.push(['グループLINEに招待された', {
       data
     }])
 

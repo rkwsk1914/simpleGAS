@@ -26,7 +26,7 @@ const checkMessage = async(e: GoogleAppsScript.Events.DoPost) =>
       },
       join: async() => {
         const group = await LineApplication.getGroupData(e)
-        if (group?.groupId) gas.setGroupData(group.groupId)
+        if (group?.groupId) gas.setGroupData(group)
       },
       follow: async () => {
         const user = await LineApplication.getUserDataFromFollow(e)
@@ -183,6 +183,23 @@ global.doPostGroupLineMTGInfo = async () => {
   if (!ids || ids?.length === 0) return
 
   const message = CreateMessage.pushTodayDeadlineInfo()
+  if (!message) return
+
+  for (const groupId of ids) {
+    try {
+      LineApplication.post(groupId, message)
+    } catch (error) {
+      // LineApplication.log.push['送信失敗']
+    }
+  }
+}
+
+global.doPostGroupLineScheduleInfo = async () => {
+  const ids = gas.getGroupIds()
+
+  if (!ids || ids?.length === 0) return
+
+  const message = CreateMessage.pushSchedule()
   if (!message) return
 
   for (const groupId of ids) {

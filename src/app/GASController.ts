@@ -13,7 +13,7 @@ import { formatStringDay, formatYyyyMmDd } from '@/utils/formatDay'
 import { Log } from '@/app/common/Log'
 import { SimpleGoogleSpreadsheet, CellType } from '@/app/common/SimpleGoogleSpreadsheet'
 
-import type { UserDataType } from '@/types/lineApp'
+import type { GroupDataType, UserDataType } from '@/types/lineApp'
 import { SelectMenu } from '@/types/selectMenu'
 export class GASController {
   log: Log
@@ -216,12 +216,14 @@ export class GASController {
     }
   }
 
-  setGroupData(groupId: string) {
+  setGroupData(group?: GroupDataType) {
+    if (!group) return
 
     const lastRow = this.lineGroupSgs.doGetLastRow(2, Header.COL_A)
     if (!lastRow) return
 
-    this.lineGroupSgs.doWriteSS(groupId, lastRow, Header.COL_A)
+    this.lineGroupSgs.doWriteSS(group.groupName, lastRow, Header.COL_B)
+    this.lineGroupSgs.doWriteSS(group.groupId, lastRow, Header.COL_A)
   }
 
   getGroupIds(): Array<string> | null {
