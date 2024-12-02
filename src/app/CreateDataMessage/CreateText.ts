@@ -201,7 +201,12 @@ export class CreateText {
       }
 
       const secondLine = time ? firstLine + '●' + time + '~' : firstLine
-      const thirdLine = secondLine + '\n' + title + '\n'
+      const thirdLine = !isSeparateDate ?
+        secondLine + '\n' + title + '\n' :
+        time ?
+        secondLine + '\n' + title + '\n' :
+        secondLine + title + '\n'
+
       const feeLine = this.__getFee(element)
       const forthLine = thirdLine + feeLine + deadLineDate
       this.text = !isSeparateDate ?
