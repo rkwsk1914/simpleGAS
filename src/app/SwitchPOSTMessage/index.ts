@@ -1,4 +1,3 @@
-import { MESSAGE } from '@/const/Message'
 import { Log } from '@/app/common/Log'
 import { GASController } from '@/app/GASController'
 import { LineApp } from '@/app/LineApp'
@@ -10,24 +9,21 @@ export class SwitchPOSTMessage {
   log: Log
   gasController: GASController
   LineApplication: LineApp
-  CreateMessage: CreateDataMessage
 
   constructor () {
     this.log = new Log('SwitchPOSTMessage')
     this.gasController = new GASController()
     this.LineApplication = new LineApp()
-    this.CreateMessage = new CreateDataMessage()
   }
 
   private async __getDeadline(): Promise<Array<MessagesType>> {
-    return await this.CreateMessage.pushMtgInfo()
+    const createMessage = new CreateDataMessage()
+    return createMessage.pushMtgInfo()
   }
 
   private async __mtgInfo(): Promise<Array<MessagesType>> {
-    return [{
-      type: 'text',
-      text: '開発中'
-    }]
+    const createMessage = new CreateDataMessage()
+    return createMessage.pushSchedule()
   }
 
   private async __setting(userId: string): Promise<Array<MessagesType>> {
@@ -55,7 +51,7 @@ export class SwitchPOSTMessage {
 
     switch (text) {
       case '〆切': {
-        this.log.push(['〆切メニュー選択'])
+        this.log.push(['〆切メニュー選択', callBack?.getDeadline ? true : false])
         if (callBack && callBack.getDeadline) return await callBack.getDeadline()
         break
       }
@@ -82,19 +78,22 @@ export class SwitchPOSTMessage {
   }: {
     e: GoogleAppsScript.Events.DoPost,
     callBack?: {
-      menu?: () => Promise<void>,
       default?: () => Promise<void>,
-      getDeadline?: () => Promise<void>,
-      mtgInfo?: () => Promise<void>,
-      setting?: () => Promise<void>,
+      menu?: () => Promise<void>,
     }
-  }): Promise<Array<MessagesType>> {
+  }): Promise<{
+    message: Array<MessagesType> | null
+    userId: string | null
+  }> {
     const user = await this.LineApplication.getUserDataFromMessage(e)
     if (!user?.userId) {
-      return [{
-        type: 'text',
-        text: 'ユーザー情報の取得エラー'
-      }]
+      return {
+        message: [{
+          type: 'text',
+          text: 'ユーザー情報の取得エラー'
+        }],
+        userId: null
+      }
     }
 
     const userId = user.userId
@@ -116,25 +115,27 @@ export class SwitchPOSTMessage {
     switch (text) {
       case 'メニュー': {
         if (callBack && callBack.menu) callBack.menu()
-        return [{
-          type: 'text',
-          text: '以下のメッセージをしてください。\n〆切\nMTG情報\n通知設定'
-        }]
+        return {
+          message: [{
+            type: 'text',
+            text: '以下のメッセージをしてください。\n〆切\nMTG情報\n通知設定'
+          }],
+          userId
+        }
       }
 
       default: {
         const message = await switchMenuMessage()
-        if (message) return message
-
-        if (callBack && callBack.default) callBack.default()
-        const array = text.split('\n')
-        const number = Number(array[0])
-
-        if (!isNaN(number)) {
-          return [MESSAGE.successAddPay]
+        if (message) return {
+          message,
+          userId
         }
 
-        return [MESSAGE.failedAddPay]
+        if (callBack && callBack.default) callBack.default()
+        return {
+          message: null,
+          userId: null
+        }
       }
     }
   }
@@ -150,30 +151,35 @@ export class SwitchPOSTMessage {
       leave?: () => Promise<void>,
       follow?: () => Promise<void>,
     }
-  }) {
+  }): Promise<{
+    message: Array<MessagesType> | null
+    userId: string | null
+  } | null> {
     const data = JSON.parse(e.postData.contents)
     const event = data.events[0]
 
     this.log.push([event])
 
     switch (event.type) {
-      case 'message':
-        this.__switchMessage({
-          e,
-          callBack: {
-            default: callBack?.message ?? undefined,
-            getDeadline: undefined,
-          }
-        })
-        return
-      case 'join':
+      case 'message': {
+          return await this.__switchMessage({
+            e,
+            callBack: {
+              default: callBack?.message ?? undefined,
+            }
+          })
+        }
+      case 'join': {
         if(callBack?.join) callBack.join()
-        return
-      case 'follow':
+          return null
+        }
+      case 'follow': {
         if(callBack?.follow) callBack.follow()
-        return
-      default:
-        return
+          return null
+        }
+      default: {
+        return null
+        }
     }
   }
 }

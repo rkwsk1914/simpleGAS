@@ -159,6 +159,16 @@ export class GASController {
     return undecidedMTGData
   }
 
+  getAllMTGData (): Array<CellType> {
+    const data = this.scheduleSgs.doReadSS({
+      row: 2,
+      col: Header.COL_A,
+      endRow: this.scheduleSgs.doGetLastRow(2,1) ?? 1000,
+      endCol: Header.COL_K,
+    })
+    return data
+  }
+
   setNewMember(user?: UserDataType) {
     if (!user) return
 
@@ -203,7 +213,27 @@ export class GASController {
     })
 
     data.map((item) => {
-      const id = item[0]
+      const id = item[Header.ARRAY_COL_A]
+      if(id && id !== '') ids.push(String(id))
+    })
+
+    return ids
+  }
+
+  getUserIds(): Array<string> | null {
+    const lastRow = this.memberSgs.doGetLastRow(2, Header.COL_A)
+    if (!lastRow) return null
+
+    const ids: Array<string> = []
+    const data: Array<CellType> = this.memberSgs.doReadSS({
+      row: 2,
+      col: Header.COL_A,
+      endRow: lastRow,
+      endCol: Header.COL_D
+    })
+
+    data.map((item) => {
+      const id = item[Header.ARRAY_COL_D]
       if(id && id !== '') ids.push(String(id))
     })
 

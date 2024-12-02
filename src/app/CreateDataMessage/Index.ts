@@ -48,19 +48,19 @@ export class CreateDataMessage {
     if (data.closeDead.length > 0) {
       CT.addSeparate()
       CT.text = CT.text + '⭐️そろそろ〆切！'
-      CT.addMessage(data.closeDead)
+      CT.addMTGMessage(data.closeDead)
     }
 
     if (data.possible.length > 0) {
       CT.addSeparate()
       CT.text = CT.text + '🔴まだ申し込み受付中'
-      CT.addMessage(data.possible)
+      CT.addMTGMessage(data.possible)
     }
 
     if (data.undecided.length > 0) {
       CT.addSeparate()
       CT.text = CT.text + '🔷〆切未定'
-      CT.addMessage(data.undecided)
+      CT.addMTGMessage(data.undecided)
     }
 
     message.push({
@@ -106,6 +106,19 @@ export class CreateDataMessage {
         text: CT.textTodayDead
       })
     }
+
+    return message
+  }
+
+  public pushSchedule (targetDay?: string): Array<MessagesType> {
+    const message: Array<MessagesType> = []
+    const data = this.gas.getAllMTGData()
+    const CT = new CreateText(targetDay)
+    CT.addScheduleMessage(data)
+    message.push({
+      type: 'text',
+      text: CT.text
+    })
 
     return message
   }
