@@ -17,7 +17,7 @@ export class Log {
     const logData = data.map((item) => JSON.stringify(item))
     const time = formatStringDay({
       targetDay: String(new Date()),
-      formatStr: 'yyyy/M/d HH:mm:ss'
+      formatStr: 'yyyy/M/d HH:mm:ss.SSS'
     }) ?? String(new Date())
     this.sgs.addData([this.appName, time, ...logData])
   }
