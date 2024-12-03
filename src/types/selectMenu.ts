@@ -7,6 +7,8 @@ export enum SelectMenu {
   // eslint-disable-next-line no-unused-vars
   schedule = 'スケジュールを通知',
   // eslint-disable-next-line no-unused-vars
+  offInfo = '通知OFF',
+  // eslint-disable-next-line no-unused-vars
   cancel = '変更しない',
   // eslint-disable-next-line no-unused-vars
   getTodayDeadline = '本日〆切',

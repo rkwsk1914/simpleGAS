@@ -7,15 +7,19 @@ import type { MessagesType } from '@/types/lineApp'
 import { SelectMenu } from '@/types/selectMenu'
 import { StatusType } from '@/types/status'
 
+import { Setting } from './Setting'
+
 export class SwitchPOSTMessage {
   log: Log
   gasController: GASController
   LineApplication: LineApp
+  Setting: Setting
 
   constructor () {
     this.log = new Log('SwitchPOSTMessage')
     this.gasController = new GASController()
     this.LineApplication = new LineApp()
+    this.Setting = new Setting()
   }
 
   private async __getTodayDeadline(): Promise<Array<MessagesType>> {
@@ -35,132 +39,6 @@ export class SwitchPOSTMessage {
   private async __mtgInfo(): Promise<Array<MessagesType>> {
     const createMessage = new CreateDataMessage()
     return createMessage.pushSchedule()
-  }
-
-  private async __suggestionSetting(userId: string): Promise<Array<MessagesType>> {
-    const gas = new GASController()
-    gas.setStatus(StatusType.startSetting, userId)
-    const setting = gas.getSetting(userId)
-    const text1 = '現在の通知設定です。\n\n' + setting
-    const text2 = '設定を変更しますか？\n\n1. はい\n2. いいえ'
-
-    return [{
-      type: 'text',
-      text: text1
-    },{
-      type: 'text',
-      text: text2
-    }]
-  }
-
-  private __setting (): Array<MessagesType> {
-    const text2 = '好きな通知設定（数字）を選んでください。\n\n' +
-    `1. ${SelectMenu.deadline}` + '\n' +
-    `2. ${SelectMenu.todayDeadline}` + '\n' +
-    `3. ${SelectMenu.schedule}` + '\n' +
-    `4. ${SelectMenu.cancel}`
-  return [{
-    type: 'text',
-    text: text2
-  }]
-  }
-
-  private async __settingStart ({
-    text,
-    userId,
-  }: {
-    text: string
-    userId: string,
-  }): Promise<Array<MessagesType> | null> {
-    const gas = new GASController()
-    switch (text) {
-      case '1':
-      case '１':
-      case SelectMenu.yes: {
-        gas.setStatus(StatusType.processSetting, userId)
-        return this.__setting()
-      }
-      default: {
-        gas.setStatus(StatusType.default, userId)
-        return null
-      }
-    }
-  }
-
-  private async __switchSetting ({
-    text,
-    userId,
-  }: {
-    text: string
-    userId: string,
-  }): Promise<Array<MessagesType>> {
-    const gas = new GASController()
-    gas.setStatus(StatusType.default, userId)
-    const setting = gas.getSetting(userId)
-    switch (text) {
-      case '1':
-      case '１':
-      case SelectMenu.deadline: {
-        this.gasController.setSetting(SelectMenu.deadline, userId)
-        break
-      }
-      case '2':
-      case '２':
-      case SelectMenu.todayDeadline: {
-        this.gasController.setSetting(SelectMenu.todayDeadline, userId)
-        break
-      }
-      case '3':
-      case '３':
-      case SelectMenu.schedule: {
-        this.gasController.setSetting(SelectMenu.schedule, userId)
-        break
-      }
-      case '4':
-      case '４':
-      case SelectMenu.cancel:
-      case 'キャンセル': {
-        return [{
-          type: 'text',
-          text: 'キャンセルしました'
-        }, {
-          type: 'text',
-          text:  '現在の通知設定です。\n\n' + setting
-        }]
-      }
-      case SelectMenu.getDeadline:
-      case SelectMenu.getTodayDeadline:
-      case SelectMenu.getSchedule:
-      case SelectMenu.setting: {
-        const missSelectMessage: Array<MessagesType> = []
-        missSelectMessage.push({
-          type: 'text',
-          text: 'ちょいまち！\n先に通知設定を完了してね！'
-        })
-        const settingMessage = await this.__setting()
-        this.log.push(['__switchSetting', settingMessage])
-        return [...missSelectMessage, ...settingMessage]
-      }
-      default: {
-        const missSelectMessage: Array<MessagesType> = []
-        missSelectMessage.push({
-          type: 'text',
-          text: '無効な入力です。1~4の数字で選択してください。'
-        })
-        const settingMessage = await this.__setting()
-        this.log.push(['__switchSetting', settingMessage])
-        return [...missSelectMessage, ...settingMessage]
-      }
-    }
-
-    const newSetting = gas.getSetting(userId)
-    return [{
-      type: 'text',
-      text: '通知設定を変更しました！'
-    }, {
-      type: 'text',
-      text:  '現在の通知設定です。\n\n' + newSetting
-    }]
   }
 
   private async __switchMenuMessage ({
@@ -204,10 +82,34 @@ export class SwitchPOSTMessage {
     return null
   }
 
-  private async __switchMessage ({
-    e,
-    callBack,
-  }: {
+  private async __switchStatus ({ userId, text }: {
+    userId: string,
+    text: string
+  }): Promise<Array<MessagesType> | null> {
+    const status = this.gasController.getStatus(userId)
+
+    switch (status) {
+      case StatusType.suggestionSetting: {
+        this.log.push(['設定変更開始'])
+        return await this.Setting.settingStart({
+          text,
+          userId
+        })
+      }
+      case StatusType.processSetting: {
+        this.log.push(['設定変更中'])
+        return await this.Setting.switchSetting({
+          text,
+          userId,
+        })
+      }
+      default: {
+        return null
+      }
+    }
+  }
+
+  private async __switchMessage ({ e, callBack }: {
     e: GoogleAppsScript.Events.DoPost,
     callBack?: {
       default?: () => Promise<void>,
@@ -245,46 +147,14 @@ export class SwitchPOSTMessage {
         todayDeadline: this.__getTodayDeadline,
         getDeadline: this.__getDeadline,
         mtgInfo: this.__mtgInfo,
-        setting: this.__suggestionSetting
+        setting: this.Setting.suggestionSetting
       }
     })
 
-    const status = this.gasController.getStatus(userId)
-
-    switch (status) {
-      case StatusType.suggestionSetting: {
-        this.log.push(['設定する？'])
-        const message = await this.__suggestionSetting(userId)
-        return {
-          message,
-          userId
-        }
-      }
-      case StatusType.startSetting: {
-        this.log.push(['設定変更開始'])
-        const message = await this.__settingStart({
-          text,
-          userId
-        })
-        return {
-          message,
-          userId
-        }
-      }
-      case StatusType.processSetting: {
-        this.log.push(['設定変更中'])
-        const message = await this.__switchSetting({
-          text,
-          userId,
-        })
-        return {
-          message,
-          userId
-        }
-      }
-      default: {
-        break
-      }
+    const statusMessage = await this.__switchStatus({ userId, text })
+    if (statusMessage) return {
+      message: statusMessage,
+      userId
     }
 
     switch (text) {

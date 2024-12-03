@@ -37,8 +37,11 @@ const checkMessage = async(e: GoogleAppsScript.Events.DoPost) =>
 
 
 global.doTest = async () => {
-  // const message2 = CreateMessage.pushMtgInfo('2024/11/28')
-  // LineApplication.post(MY_ACCOUNT_ID ?? '', message2)
+  const message2 = CreateMessage.pushTodayDeadlineInfo('2024/10/15')
+  if (message2) LineApplication.post(MY_ACCOUNT_ID ?? '', message2)
+
+  const message1 = CreateMessage.pushTodayDeadlineInfo('2024/12/2')
+  if (message1) LineApplication.post(MY_ACCOUNT_ID ?? '', message1)
 
   /*
   const e: GoogleAppsScript.Events.DoPost = {
@@ -116,8 +119,6 @@ global.doTest = async () => {
 
   // const message = await checkMessage(e2)
   // log.push([message])
-
-  gas.setStatus('setting', MY_ACCOUNT_ID ?? '')
 }
 
 global.doPost = async (e: GoogleAppsScript.Events.DoPost) => {
