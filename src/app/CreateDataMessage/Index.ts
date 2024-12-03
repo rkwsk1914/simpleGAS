@@ -4,6 +4,7 @@ import { GASController } from '@/app/GASController'
 import { CreateText } from './CreateText'
 
 import type { MessagesType } from '@/types/lineApp'
+import { SelectMenu } from '@/types/selectMenu'
 
 export class CreateDataMessage {
   log: Log
@@ -12,6 +13,21 @@ export class CreateDataMessage {
   constructor () {
     this.log = new Log('CreateDataMessage')
     this.gas = new GASController()
+  }
+
+  private __createTodayDeadlineInfoMessage (targetDay?: string): Array<MessagesType> | null {
+    const CT = new CreateText(targetDay)
+    const data = this.gas.getTodayDeadLineData(targetDay)
+    if (data.length > 0) {
+      CT.textTodayDead = CT.textTodayDead + `⚠️${SelectMenu.getTodayDeadline}！\n\n`
+      CT.addTodayDeadMessage(data)
+      return [{
+        type: 'text',
+        text: CT.textTodayDead
+      }]
+    }
+
+    return null
   }
 
   public pushMtgInfo (targetDay?: string): Array<MessagesType> {
@@ -68,46 +84,18 @@ export class CreateDataMessage {
       text: CT.text
     })
 
-    if (data.todayDead.length > 0) {
-      CT.textTodayDead = CT.textTodayDead + '⚠️今日〆切！'
-      CT.addTodayDeadMessage(data.todayDead)
-      message.push({
-        type: 'text',
-        text: CT.textTodayDead
-      })
-    }
+    const todayDeadMessage = this.__createTodayDeadlineInfoMessage(targetDay)
+    if (todayDeadMessage) return [
+      ...message,
+      ...todayDeadMessage
+    ]
 
     return message
   }
 
   public pushTodayDeadlineInfo (targetDay?: string): Array<MessagesType> | null {
-    const CT = new CreateText(targetDay)
-    const message: Array<MessagesType> = []
-
-    const data = {
-      todayDead: this.gas.getTodayDeadLineData(targetDay),
-    }
-
-    if ( data.todayDead.length === 0) {
-      return null
-    }
-
-    const firstMessage: MessagesType = {
-      type: 'text',
-      text: CT.firstText
-    }
-    message.push(firstMessage)
-
-    if (data.todayDead.length > 0) {
-      CT.textTodayDead = CT.textTodayDead + '⚠️今日〆切！'
-      CT.addTodayDeadMessage(data.todayDead)
-      message.push({
-        type: 'text',
-        text: CT.textTodayDead
-      })
-    }
-
-    return message
+    const todayDeadMessage = this.__createTodayDeadlineInfoMessage(targetDay)
+    return todayDeadMessage
   }
 
   public pushSchedule (targetDay?: string): Array<MessagesType> {

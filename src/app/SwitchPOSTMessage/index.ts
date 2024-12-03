@@ -27,7 +27,7 @@ export class SwitchPOSTMessage {
     const message = createMessage.pushTodayDeadlineInfo()
     return message ? message : [{
       type: 'text',
-      text: 'ご安心を！\n本日〆切のMTGはありません'
+      text: `大丈夫です❗\n${SelectMenu.getTodayDeadline}のMTGはありません❗`
     }]
   }
 

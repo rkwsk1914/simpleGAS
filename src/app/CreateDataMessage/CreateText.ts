@@ -84,7 +84,7 @@ export class CreateText {
   }
 
   public addTodayDeadMessage (array: Array<CellType>) {
-    array.forEach((element, ) => {
+    array.forEach((element, index) => {
       const title = element[Header.ARRAY_COL_A]
 
       const date = formatStringDay({
@@ -107,8 +107,9 @@ export class CreateText {
       const displayDate = this.todayYear === itemYear ? itemMothDay : date
       const day = time ? `${displayDate} ${time}` : displayDate
 
+      const newLine = index === 0 ? '' : '\n\n'
       const mtgInfo = `【${day}】\n${title}`
-      this.textTodayDead = this.textTodayDead + `\n\n${mtgInfo}\n\nノートをご確認ください。`
+      this.textTodayDead = this.textTodayDead + newLine + `${mtgInfo}`
     })
   }
 
