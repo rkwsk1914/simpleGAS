@@ -16,4 +16,8 @@ export enum SelectMenu {
   getSchedule = 'MTG情報',
   // eslint-disable-next-line no-unused-vars
   setting = '通知設定',
+  // eslint-disable-next-line no-unused-vars
+  yes = 'はい',
+  // eslint-disable-next-line no-unused-vars
+  no = 'いいえ',
 }

@@ -67,7 +67,7 @@ export class GASController {
     if (data) this.memberSgs.doWriteSS(status, data?.row, Header.COL_F)
   }
 
-  getSetting (userId: string): string | null {
+  getSetting (userId: string): string {
     const data = this.__findUserData(userId)
     const setting = data?.userData && data.userData[Header.ARRAY_COL_G]
       ? String(data.userData[Header.ARRAY_COL_G]) :

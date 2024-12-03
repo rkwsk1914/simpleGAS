@@ -5,6 +5,7 @@ import { CreateDataMessage } from '@/app/CreateDataMessage'
 
 import type { MessagesType } from '@/types/lineApp'
 import { SelectMenu } from '@/types/selectMenu'
+import { StatusType } from '@/types/status'
 
 export class SwitchPOSTMessage {
   log: Log
@@ -36,19 +37,12 @@ export class SwitchPOSTMessage {
     return createMessage.pushSchedule()
   }
 
-  private async __setting(userId: string): Promise<Array<MessagesType>> {
+  private async __suggestionSetting(userId: string): Promise<Array<MessagesType>> {
     const gas = new GASController()
-    gas.setStatus('setting', userId)
+    gas.setStatus(StatusType.startSetting, userId)
     const setting = gas.getSetting(userId)
-    const text1 = setting ?
-      '現在の通知設定です。\n\n' + setting :
-      `【初期設定（${SelectMenu.deadline}）】`
-
-      const text2 = '好きな通知設定を選んでください。\n\n' +
-      `1. ${SelectMenu.deadline}` + '\n' +
-      `2. ${SelectMenu.todayDeadline}` + '\n' +
-      `3. ${SelectMenu.schedule}` + '\n' +
-      `4. ${SelectMenu.cancel}`
+    const text1 = '現在の通知設定です。\n\n' + setting
+    const text2 = '設定を変更しますか？\n\n1. はい\n2. いいえ'
 
     return [{
       type: 'text',
@@ -59,6 +53,40 @@ export class SwitchPOSTMessage {
     }]
   }
 
+  private __setting (): Array<MessagesType> {
+    const text2 = '好きな通知設定（数字）を選んでください。\n\n' +
+    `1. ${SelectMenu.deadline}` + '\n' +
+    `2. ${SelectMenu.todayDeadline}` + '\n' +
+    `3. ${SelectMenu.schedule}` + '\n' +
+    `4. ${SelectMenu.cancel}`
+  return [{
+    type: 'text',
+    text: text2
+  }]
+  }
+
+  private async __settingStart ({
+    text,
+    userId,
+  }: {
+    text: string
+    userId: string,
+  }): Promise<Array<MessagesType> | null> {
+    const gas = new GASController()
+    switch (text) {
+      case '1':
+      case '１':
+      case SelectMenu.yes: {
+        gas.setStatus(StatusType.processSetting, userId)
+        return this.__setting()
+      }
+      default: {
+        gas.setStatus(StatusType.default, userId)
+        return null
+      }
+    }
+  }
+
   private async __switchSetting ({
     text,
     userId,
@@ -67,7 +95,7 @@ export class SwitchPOSTMessage {
     userId: string,
   }): Promise<Array<MessagesType>> {
     const gas = new GASController()
-    gas.setStatus('', userId)
+    gas.setStatus(StatusType.default, userId)
     const setting = gas.getSetting(userId)
     switch (text) {
       case '1':
@@ -109,7 +137,7 @@ export class SwitchPOSTMessage {
           type: 'text',
           text: 'ちょいまち！\n先に通知設定を完了してね！'
         })
-        const settingMessage = await this.__setting(userId)
+        const settingMessage = await this.__setting()
         this.log.push(['__switchSetting', settingMessage])
         return [...missSelectMessage, ...settingMessage]
       }
@@ -119,7 +147,7 @@ export class SwitchPOSTMessage {
           type: 'text',
           text: '無効な入力です。1~4の数字で選択してください。'
         })
-        const settingMessage = await this.__setting(userId)
+        const settingMessage = await this.__setting()
         this.log.push(['__switchSetting', settingMessage])
         return [...missSelectMessage, ...settingMessage]
       }
@@ -212,14 +240,33 @@ export class SwitchPOSTMessage {
         todayDeadline: this.__getTodayDeadline,
         getDeadline: this.__getDeadline,
         mtgInfo: this.__mtgInfo,
-        setting: this.__setting
+        setting: this.__suggestionSetting
       }
     })
 
     const status = this.gasController.getStatus(userId)
 
     switch (status) {
-      case 'setting': {
+      case StatusType.suggestionSetting: {
+        this.log.push(['設定する？'])
+        const message = await this.__suggestionSetting(userId)
+        return {
+          message,
+          userId
+        }
+      }
+      case StatusType.startSetting: {
+        this.log.push(['設定変更開始'])
+        const message = await this.__settingStart({
+          text,
+          userId
+        })
+        return {
+          message,
+          userId
+        }
+      }
+      case StatusType.processSetting: {
         this.log.push(['設定変更中'])
         const message = await this.__switchSetting({
           text,
@@ -241,7 +288,7 @@ export class SwitchPOSTMessage {
         return {
           message: [{
             type: 'text',
-            text: '以下のメッセージをしてください。\n〆切\nMTG情報\n通知設定'
+            text: `以下のメッセージをしてください。\n${SelectMenu.getDeadline}\n${SelectMenu.getTodayDeadline}\n${SelectMenu.getSchedule}\n${SelectMenu.setting}`
           }],
           userId
         }
