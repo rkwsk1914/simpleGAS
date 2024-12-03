@@ -98,7 +98,7 @@ export class LineApp {
       data
     }])
 
-    if (event.message.type !== 'follow') return
+    if (event.type !== 'follow') return
 
     const userId = event.source.userId
     if (!userId) return
