@@ -233,6 +233,11 @@ export class SwitchPOSTMessage {
     const event = data.events[0]
     const text = event.message.text
 
+    if (event.source.type === 'group') return {
+      message: null,
+      userId: null
+    }
+
     const switchMenuMessage = () => this.__switchMenuMessage({
       userId,
       text,
