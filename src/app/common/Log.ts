@@ -1,4 +1,5 @@
 import { BOOK_URL } from '@/const/Header'
+import { formatStringDay } from '@/utils/formatDay'
 
 import { SimpleGoogleSpreadsheet } from '@/app/common/SimpleGoogleSpreadsheet'
 
@@ -14,6 +15,10 @@ export class Log {
   push (data: Array<any>) {
     if (data.length === 0) return
     const logData = data.map((item) => JSON.stringify(item))
-    this.sgs.addData([this.appName, String(new Date()), ...logData])
+    const time = formatStringDay({
+      targetDay: String(new Date()),
+      formatStr: 'yyyy/M/d HH:mm:ss'
+    }) ?? String(new Date())
+    this.sgs.addData([this.appName, time, ...logData])
   }
 }
