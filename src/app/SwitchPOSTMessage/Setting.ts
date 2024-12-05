@@ -139,7 +139,7 @@ export class Setting {
           text: 'ちょいまち！\n先に通知設定を完了してね!'
         })
         const settingMessage = await this.__showSettingMenu()
-        this.log.push(['__switchSetting', settingMessage])
+        // this.log.push(['__switchSetting', settingMessage])
         return [...missSelectMessage, ...settingMessage]
       }
       default: {
@@ -149,7 +149,7 @@ export class Setting {
           text: '無効な入力です。1~4の数字で選択してください。'
         })
         const settingMessage = await this.__showSettingMenu()
-        this.log.push(['__switchSetting', settingMessage])
+        // this.log.push(['__switchSetting', settingMessage])
         return [...missSelectMessage, ...settingMessage]
       }
     }

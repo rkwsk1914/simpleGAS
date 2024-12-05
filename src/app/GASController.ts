@@ -78,7 +78,7 @@ export class GASController {
     const result = setting ? setting : SelectMenu.deadline
     if (setting === null) this.setSetting(SelectMenu.deadline, userId)
 
-    this.log.push(['現在の通知設定', result])
+    // this.log.push(['現在の通知設定', result])
     return result
   }
 
@@ -108,7 +108,7 @@ export class GASController {
       if (itemDay && isEqual(itemDay, deadLineDay)) return item
     })
 
-    this.log.push(todayDeadLineData)
+    // this.log.push(todayDeadLineData)
     return todayDeadLineData
   }
 
@@ -138,7 +138,7 @@ export class GASController {
       }) && !isEqual(itemDay, today)) return item
     })
 
-    this.log.push(closeDeadLineData)
+     // this.log.push(closeDeadLineData)
     return closeDeadLineData
   }
 
@@ -164,7 +164,7 @@ export class GASController {
       }
     })
 
-    this.log.push(possibleMTGData)
+    // this.log.push(possibleMTGData)
     return possibleMTGData
   }
 
@@ -180,7 +180,7 @@ export class GASController {
       if (!item[Header.ARRAY_COL_B]) return item
     })
 
-    this.log.push(undecidedMTGData)
+    // this.log.push(undecidedMTGData)
     return undecidedMTGData
   }
 

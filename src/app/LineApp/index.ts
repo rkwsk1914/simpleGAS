@@ -82,7 +82,7 @@ export class LineApp {
     const data = JSON.parse(e.postData.contents)
     const event = data.events[0]
 
-    this.log.push([event])
+    // this.log.push([event])
 
     if (event.message.type !== 'text') return
     if (!event.source.userId) return
@@ -103,15 +103,11 @@ export class LineApp {
     const userId = event.source.userId
     if (!userId) return
 
-    this.log.push([{
-      userId
-    }])
+    // this.log.push([{ userId }])
 
     const userData = await this.__getUserData(userId)
 
-    this.log.push([{
-      userData
-    }])
+    this.log.push([{ userData }])
 
     return userData
   }
@@ -120,24 +116,18 @@ export class LineApp {
     const data = JSON.parse(e.postData.contents)
     const event = data.events[0]
 
-    this.log.push(['LINEからメッセージ', {
-      data
-    }])
+    // this.log.push(['LINEからメッセージ', { data }])
 
     if (event.message.type !== 'text') return
 
     const userId = event.source.userId
     if (!userId) return
 
-    this.log.push([{
-      userId
-    }])
+    // this.log.push([{ userId }])
 
     const userData = await this.__getUserData(userId)
 
-    this.log.push([{
-      userData
-    }])
+    // this.log.push([{ userData }])
 
     return userData
   }
@@ -146,18 +136,14 @@ export class LineApp {
     const data = JSON.parse(e.postData.contents)
     const event = data.events[0]
 
-    this.log.push(['グループLINEに招待された', {
-      data
-    }])
+    this.log.push(['グループLINEに招待された', { data }])
 
     if (!event.source && event.source.type !== 'group') return
 
     const groupId = event.source.groupId
     if (!groupId) return
 
-    this.log.push([{
-      groupId
-    }])
+    this.log.push([{ groupId }])
 
     const group = await this.__getGroupData(groupId)
 

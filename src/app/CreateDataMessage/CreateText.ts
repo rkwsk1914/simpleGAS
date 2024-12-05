@@ -156,7 +156,7 @@ export class CreateText {
       return 0
     })
 
-    this.log.push(array)
+    // this.log.push(array)
 
     let separateDate = ''
     let isSeparateDate = true

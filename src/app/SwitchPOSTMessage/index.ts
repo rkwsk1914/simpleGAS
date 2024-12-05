@@ -90,14 +90,14 @@ export class SwitchPOSTMessage {
 
     switch (status) {
       case StatusType.suggestionSetting: {
-        this.log.push(['設定変更開始'])
+        // this.log.push(['設定変更開始'])
         return await this.Setting.settingStart({
           text,
           userId
         })
       }
       case StatusType.processSetting: {
-        this.log.push(['設定変更中'])
+        // this.log.push(['設定変更中'])
         return await this.Setting.switchSetting({
           text,
           userId,

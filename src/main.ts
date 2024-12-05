@@ -4,7 +4,7 @@ import { GASController } from '@/app/GASController'
 import { LineApp } from '@/app/LineApp'
 import { CreateDataMessage } from '@/app/CreateDataMessage'
 import { SwitchPOSTMessage } from '@/app/SwitchPOSTMessage'
-import { Log } from '@/app/common/Log'
+// import { Log } from '@/app/common/Log'
 
 import { SelectMenu } from '@/types/selectMenu'
 
@@ -14,7 +14,7 @@ const LineApplication = new LineApp()
 const gas = new GASController()
 const CreateMessage = new CreateDataMessage()
 const SwitchPOSTMessageApp = new SwitchPOSTMessage()
-const log = new Log('MAIN')
+// const log = new Log('MAIN')
 
 const checkMessage = async(e: GoogleAppsScript.Events.DoPost) =>
   await SwitchPOSTMessageApp.checkMessageAndPost({
@@ -125,14 +125,14 @@ global.doTest = async () => {
 }
 
 global.doPost = async (e: GoogleAppsScript.Events.DoPost) => {
-  log.push([e])
+  // log.push([e])
 
   const res = await checkMessage(e)
   if (!res) return
 
   const { message, userId } = res
   if (!message || !userId) return
-  log.push([res])
+  // log.push([res])
   LineApplication.post(userId, message)
 }
 
@@ -149,7 +149,7 @@ global.doPostDeadLineInfo = () => {
     filterSetting: SelectMenu.deadline
   })
 
-  log.push([message, ids])
+  // log.push([message, ids])
   if (!ids || ids?.length === 0) return
 
   LineApplication.multicast(ids, message)
@@ -163,7 +163,7 @@ global.doPostTodayDeadLineInfo = () => {
     filterSetting: SelectMenu.todayDeadline
   })
 
-  log.push([message, ids])
+  // log.push([message, ids])
   if (!ids || ids?.length === 0) return
 
   LineApplication.multicast(ids, message)
@@ -175,7 +175,7 @@ global.doPostScheduleInfo = () => {
     filterSetting: SelectMenu.schedule
   })
 
-  log.push([message, ids])
+  // log.push([message, ids])
   if (!ids || ids?.length === 0) return
 
   LineApplication.multicast(ids, message)
