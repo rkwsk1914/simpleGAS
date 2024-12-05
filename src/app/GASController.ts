@@ -20,22 +20,24 @@ export class GASController {
   scheduleSgs: SimpleGoogleSpreadsheet
   memberSgs: SimpleGoogleSpreadsheet
   lineGroupSgs: SimpleGoogleSpreadsheet
+  lineMemberSgs: SimpleGoogleSpreadsheet
 
   constructor () {
     this.log = new Log('GASController')
     this.scheduleSgs = new SimpleGoogleSpreadsheet(Header.BOOK_URL, 'スケジュール')
     this.memberSgs = new SimpleGoogleSpreadsheet(Header.BOOK_URL, 'メンバー')
     this.lineGroupSgs = new SimpleGoogleSpreadsheet(Header.BOOK_URL, 'lineGroup')
+    this.lineMemberSgs = new SimpleGoogleSpreadsheet(Header.BOOK_URL, 'lineMember')
   }
 
   private __findUserData(userId: string): {
     userData: CellType
     row: number
   } | null {
-    const lastRow = this.memberSgs.doGetLastRow(2, Header.COL_A)
+    const lastRow = this.lineMemberSgs.doGetLastRow(2, Header.COL_A)
     if (!lastRow) return null
 
-    const data: Array<CellType> = this.memberSgs.doReadSS({
+    const data: Array<CellType> = this.lineMemberSgs.doReadSS({
       row: 2,
       col: Header.COL_A,
       endRow: lastRow,
@@ -56,21 +58,21 @@ export class GASController {
 
   getStatus (userId: string): string | null {
     const data = this.__findUserData(userId)
-    const status = data?.userData && data.userData[Header.ARRAY_COL_F] ?
-      String(data.userData[Header.ARRAY_COL_F]) :
+    const status = data?.userData && data.userData[Header.ARRAY_COL_C] ?
+      String(data.userData[Header.ARRAY_COL_C]) :
       null
     return status
   }
 
   setStatus (status: string, userId: string) {
     const data = this.__findUserData(userId)
-    if (data) this.memberSgs.doWriteSS(status, data?.row, Header.COL_F)
+    if (data) this.lineMemberSgs.doWriteSS(status, data?.row, Header.COL_C)
   }
 
   getSetting (userId: string): string {
     const data = this.__findUserData(userId)
-    const setting = data?.userData && data.userData[Header.ARRAY_COL_G]
-      ? String(data.userData[Header.ARRAY_COL_G]) :
+    const setting = data?.userData && data.userData[Header.ARRAY_COL_D]
+      ? String(data.userData[Header.ARRAY_COL_D]) :
       null
 
     const result = setting ? setting : SelectMenu.deadline
@@ -82,7 +84,7 @@ export class GASController {
 
   setSetting (setting: string, userId: string) {
     const data = this.__findUserData(userId)
-    if (data) this.memberSgs.doWriteSS(setting, data?.row, Header.COL_G)
+    if (data) this.lineMemberSgs.doWriteSS(setting, data?.row, Header.COL_D)
   }
 
   getTodayDeadLineData (targetDay?: string): Array<CellType> {
@@ -195,10 +197,10 @@ export class GASController {
   setNewMember(user?: UserDataType) {
     if (!user) return
 
-    const lastRow = this.memberSgs.doGetLastRow(2, Header.COL_A)
+    const lastRow = this.lineMemberSgs.doGetLastRow(2, Header.COL_A)
     if (!lastRow) return
 
-    const data = this.memberSgs.doReadSS({
+    const data = this.lineMemberSgs.doReadSS({
       row: 2,
       col: Header.COL_A,
       endRow: lastRow,
@@ -206,13 +208,13 @@ export class GASController {
     }) as Array<Array<string | number>>
 
     const findUserRow = data.find((item ) =>
-      item[Header.ARRAY_COL_D] === user.userId
+      item[Header.ARRAY_COL_A] === user.userId
     )
 
     if (!findUserRow) {
-      this.memberSgs.doWriteSS(user.userId, lastRow, Header.COL_D)
-      this.memberSgs.doWriteSS(user.name, lastRow, Header.COL_E)
-      this.memberSgs.doWriteSS(SelectMenu.deadline, lastRow, Header.COL_G)
+      this.lineMemberSgs.doWriteSS(user.userId, lastRow, Header.COL_A)
+      this.lineMemberSgs.doWriteSS(user.name, lastRow, Header.COL_B)
+      this.lineMemberSgs.doWriteSS(SelectMenu.todayDeadline, lastRow, Header.COL_D)
     }
   }
 
@@ -251,11 +253,11 @@ export class GASController {
   }: {
     filterSetting?: string
   }): Array<string> | null {
-    const lastRow = this.memberSgs.doGetLastRow(2, Header.COL_A)
+    const lastRow = this.lineMemberSgs.doGetLastRow(2, Header.COL_A)
     if (!lastRow) return null
 
     const ids: Array<string> = []
-    const data: Array<CellType> = this.memberSgs.doReadSS({
+    const data: Array<CellType> = this.lineMemberSgs.doReadSS({
       row: 2,
       col: Header.COL_A,
       endRow: lastRow,
@@ -263,12 +265,12 @@ export class GASController {
     })
 
     data.map((item) => {
-      const id = item[Header.ARRAY_COL_D]
-      const status = item[Header.ARRAY_COL_F]
+      const id = item[Header.ARRAY_COL_A]
+      const status = item[Header.ARRAY_COL_C]
 
       if(id && id !== '' && status === '') {
         if (filterSetting) {
-          const setting = item[Header.ARRAY_COL_G]
+          const setting = item[Header.ARRAY_COL_D]
           if (setting === filterSetting) ids.push(String(id))
           return
         }
