@@ -41,13 +41,14 @@ export class GASController {
       row: 2,
       col: Header.COL_A,
       endRow: lastRow,
-      endCol: Header.COL_G
+      endCol: Header.COL_G,
+      hasBlank: true
     })
 
-    const userData = data.find((item) => item[Header.ARRAY_COL_D] === userId)
+    const userData = data.find((item) => item[Header.ARRAY_COL_A] === userId)
     if (!userData) return null
 
-    const index = data.findIndex((item) => item[Header.ARRAY_COL_D] === userId)
+    const index = data.findIndex((item) => item[Header.ARRAY_COL_A] === userId)
     const row = index + 2
 
     return {
