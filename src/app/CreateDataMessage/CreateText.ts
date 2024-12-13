@@ -162,7 +162,7 @@ export class CreateText {
     let isSeparateDate = true
     array.forEach((element) => {
       const title = element[Header.ARRAY_COL_A]
-      const deadLineDate = element[Header.ARRAY_COL_B] ? '\n' + formatStringDay({
+      const deadLineDate = element[Header.ARRAY_COL_B] ? formatStringDay({
         targetDay: element[Header.ARRAY_COL_B] as string,
         formatStr: 'M/d' + ' 〆切'
       }) : ''
@@ -190,9 +190,9 @@ export class CreateText {
       const displayDate = this.todayYear === itemYear ? itemMothDay : date
       const ee = date ? format(date, 'EEE', { locale: ja }) : ''
 
-      let firstLine = `${displayDate} (${ee})\n\n`
+      let dateLine = `${displayDate} (${ee})\n\n`
       if (separateDate === date) {
-        firstLine = ''
+        dateLine = ''
         isSeparateDate = false
       } else {
         this.addSeparate({
@@ -201,18 +201,19 @@ export class CreateText {
         isSeparateDate = true
       }
 
-      const secondLine = time ? firstLine + '●' + time + '~' : firstLine
-      const thirdLine = !isSeparateDate ?
-        secondLine + '\n' + title + '\n' :
+      const timeLine = time ? dateLine + '●' + time + '~' : dateLine
+      const titleLine = !isSeparateDate ?
+        timeLine + '\n' + title :
         time ?
-        secondLine + '\n' + title + '\n' :
-        secondLine + title + '\n'
+        timeLine + '\n' + title :
+        timeLine + title
 
-      const feeLine = this.__getFee(element)
-      const forthLine = thirdLine + feeLine + deadLineDate
+      const fee = this.__getFee(element)
+      const feeLine = fee === '' ? '\n'  : '\n' + fee + '\n'
+      const deadLine = titleLine + feeLine + deadLineDate
       this.text = !isSeparateDate ?
-        this.text + `\n\n${forthLine}` :
-        this.text + `${forthLine}`
+        this.text + `\n\n${deadLine}` :
+        this.text + `${deadLine}`
 
       separateDate = date
     })
