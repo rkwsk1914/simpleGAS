@@ -128,7 +128,7 @@ export class CreateTextAddMTG {
         })
         isSeparateDate = true
 
-        const displayDateWithTime = separateDate + '\n\n' + time
+        const displayDateWithTime = date + '\n\n' + time
 
         this.textDuplicateData = this.textDuplicateData +
           (time ? displayDateWithTime : separateDate)
