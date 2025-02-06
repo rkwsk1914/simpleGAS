@@ -12,8 +12,17 @@ export class Log {
     this.sgs = new SimpleGoogleSpreadsheet(BOOK_URL, 'log')
   }
 
-  push (data: Array<any>) {
+  async push (data: Array<any>) {
     if (process.env.NODE_ENV === 'production' || data.length === 0) return
+    const logData = data.map((item) => JSON.stringify(item))
+    const time = formatStringDay({
+      targetDay: String(new Date()),
+      formatStr: 'yyyy/M/d HH:mm:ss.SSS'
+    }) ?? String(new Date())
+    this.sgs.addData([this.appName, time, ...logData])
+  }
+
+  async info (data: Array<any>) {
     const logData = data.map((item) => JSON.stringify(item))
     const time = formatStringDay({
       targetDay: String(new Date()),

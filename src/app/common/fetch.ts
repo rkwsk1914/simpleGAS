@@ -6,7 +6,7 @@ export class FetchFunction {
     this.log = new Log('FetchFunction')
   }
 
-  doGet ({
+  async doGet ({
     url,
     options
   }: {
@@ -15,12 +15,12 @@ export class FetchFunction {
   }) {
     if (!url || url === '') return
 
-    this.log.push([url])
+    // await this.log.push([url])
     const response = options ? UrlFetchApp.fetch(url, options) : UrlFetchApp.fetch(url)
 
     if (response.getContentText()) {
       const jsonData = JSON.parse(response.getContentText())
-      this.log.push([JSON.stringify(jsonData)])
+      // await this.log.push([JSON.stringify(jsonData)])
       return jsonData
     }
 
@@ -29,21 +29,21 @@ export class FetchFunction {
     }
   }
 
-  doPost ({
+  async doPost ({
     url,
     options
   }: {
     url: string,
     options?: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions
-  }) {
+  }): Promise<any> {
     if (!url || url === '') return
 
-    this.log.push([url, JSON.stringify(options)])
+    await this.log.push([url, JSON.stringify(options)])
     try {
       const response = options ? UrlFetchApp.fetch(url, options) : UrlFetchApp.fetch(url)
       if (response.getContentText()) {
         const jsonData = JSON.parse(response.getContentText())
-        this.log.push(['', JSON.stringify(jsonData)])
+        await this.log.push(['','jsonData', JSON.stringify(jsonData)])
         return jsonData
       }
 
@@ -58,10 +58,10 @@ export class FetchFunction {
           message: e.message,
           stack: e.stack || 'No stack trace'
         }
-        this.log.push(['response', errorInfo])
+        await this.log.push(['response', errorInfo])
       } else {
         // その他のエラー（非 Error オブジェクト）
-        this.log.push(['response', { message: 'Unknown error', raw: e }])
+        await this.log.push(['response', { message: 'Unknown error', raw: e }])
       }
     }
   }
