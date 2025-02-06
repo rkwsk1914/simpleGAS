@@ -7,3 +7,8 @@ export type UserDataType = {
   userId: string
   name: string
 }
+
+export type GroupDataType = {
+  groupId: string
+  groupName: string
+}
