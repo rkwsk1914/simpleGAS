@@ -10,6 +10,8 @@ import { StatusType } from '@/types/status'
 
 import { Setting } from './Setting'
 
+import { doPostScheduleInfo } from '@/main'
+
 export class SwitchPOSTMessage {
   log: Log
   gasController: GASController
@@ -123,6 +125,15 @@ export class SwitchPOSTMessage {
 
     if (type === 'group' && text) {
       if (groupId === process.env.MY_GROUP_ID) {
+        if (text === '更新') {
+          doPostScheduleInfo()
+          return {
+            message: null,
+            // 本当はGropuId
+            userId: null
+          }
+        }
+
         this.LineApplication.post(groupId, [{
           type: 'text',
           text: 'MTG情報を読み込みます'

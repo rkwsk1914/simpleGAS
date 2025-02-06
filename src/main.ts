@@ -145,7 +145,7 @@ global.doPostTodayDeadLineInfo = async () => {
  * スケジュールLINE通知
  * @returns
  */
-const doPostScheduleInfo = async (targetIds?: string) => {
+export const doPostScheduleInfo = async (targetIds?: string) => {
   const message = CreateMessage.pushSchedule()
   const ids = await gas.getUserIds({
     filterSetting: SelectMenu.ABO
