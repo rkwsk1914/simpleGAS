@@ -7,7 +7,8 @@
     "lint": "eslint src --fix",
     "build": "webpack --config webpack.config.gas.js",
     "push": "webpack --config webpack.config.gas.js && clasp push",
-    "dev": "webpack --config webpack.config.gas.js --mode=development && clasp push",
+    "dev": "webpack --config webpack.config.gas.js --mode=development",
+    "devpush": "webpack --config webpack.config.gas.js --mode=development && clasp push",
     "watch": "webpack --watch --config webpack.config.gas.js --mode=development",
     "test": "jest"
   },
